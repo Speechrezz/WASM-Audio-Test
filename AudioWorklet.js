@@ -927,6 +927,7 @@ function dbg(...args) {
 
 function getSampleRate() { return new AudioContext().sampleRate; }
 function getNumberOfChannels() { const audioContext = new AudioContext(); const oscillator = audioContext.createOscillator(); const numChannels = oscillator.channelCount; oscillator.disconnect(); return numChannels; }
+function onAudioProcessorInitialized(nodeHandle) { if (typeof onAudioProcessorInitialized === 'function') { onAudioProcessorInitialized(EmAudio[nodeHandle]); } }
 function InitHtmlUi(audioContext) { let startButton = document.createElement('button'); startButton.innerHTML = 'Toggle playback'; document.body.appendChild(startButton); audioContext = emscriptenGetAudioObject(audioContext); startButton.onclick = () => { if (audioContext.state != 'running') { audioContext.resume(); } else { audioContext.suspend(); } }; }
 
 // end include: preamble.js
@@ -4385,7 +4386,9 @@ var wasmImports = {
   /** @export */
   getSampleRate,
   /** @export */
-  memory: wasmMemory
+  memory: wasmMemory,
+  /** @export */
+  onAudioProcessorInitialized
 };
 var wasmExports = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);

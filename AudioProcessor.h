@@ -48,14 +48,14 @@ public:
 
 	}
 
-	void process(AudioBufferWASM& outputBuffer)
+	void process(AudioBufferWASM& outputBuffer, float volume)
 	{
 		for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
 		{
 			auto* output = outputBuffer.getChannelPointer(channel);
 			for (int i = 0; i < outputBuffer.getNumSamples(); ++i)
 			{
-				output[i] = (rand() / (float)RAND_MAX * 2.0f - 1.0f) * 0.1f;
+				output[i] = (rand() / (float)RAND_MAX * 2.0f - 1.0f) * volume; //0.1f;
 			}
 		}
 	}

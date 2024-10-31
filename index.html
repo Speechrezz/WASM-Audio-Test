@@ -6,6 +6,30 @@
   <title>Document</title>
   <script src="audioworklet.js"></script>
 </head>
+<script>
+  console.log("Hello!");
+  function onAudioProcessorInitialized(node)
+  {
+    console.log("Init!");
+    console.log(node.parameters.get(0));
+    let div = document.createElement('div');
+    div.innerHTML = 'Choose frequency: <input style="width: 300px;" type="range" min="20" max="10000" value="440" class="slider" id="pitch"> <span id="pitchValue">440</span><br>' +
+                    'Choose volume: <input style="width: 300px;" type="range" min="0" max="100" value="30" class="slider" id="volume"> <span id="volumeValue">30%</span><br>';
+    document.body.appendChild(div);
+    document.querySelector('#pitch').oninput = (e) => {
+      document.querySelector('#pitchValue').innerHTML = parseInt(e.target.value);
+    };
+
+    // Volume Slider
+    const volumeSlider = document.querySelector('#volume');
+    volumeSlider.oninput = (e) => {
+      document.querySelector('#volumeValue').innerHTML = parseInt(e.target.value) + '%';
+      node.parameters.get(0).value = parseFloat(e.target.value) / 100;
+    };
+
+    node.parameters.get(0).value = parseFloat(volumeSlider.value) / 100;
+  }
+</script>
 <body id="body">
   <h1>Hello!</h1>
 </body>

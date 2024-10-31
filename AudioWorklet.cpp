@@ -21,22 +21,22 @@ WebAudioParamDescriptor testParam
 };
 
 /* Steps to use Wasm-based AudioWorklets:
-  1. Create a Web Audio AudioContext either via manual JS code and calling
-	 emscriptenRegisterAudioObject() from JS, or by calling
-	 emscripten_create_audio_context() (shown in this sample)
-  2. Initialize a Wasm AudioWorklet scope on the audio context by calling
-	 emscripten_start_wasm_audio_worklet_thread_async(). This shares the Wasm
-	 Module, Memory, etc. to the AudioWorklet scope, and establishes the stack
-	 space for the Audio Worklet.
-	 This needs to be called exactly once during page's lifetime. There is no
-	 mechanism in Web Audio to shut down/uninitialize the scope.
-  3. Create one or more of Audio Worklet Processors with the desired name and
-	 AudioParam configuration.
-  4. Instantiate Web Audio audio graph nodes from the above created worklet
-	 processors, specifying the desired input-output configurations and Wasm-side
-	 function callbacks to call for each node.
-  5. Add the graph nodes to the Web Audio graph, and the audio callbacks should
-	 begin to fire.
+	1. Create a Web Audio AudioContext either via manual JS code and calling
+		emscriptenRegisterAudioObject() from JS, or by calling
+		emscripten_create_audio_context() (shown in this sample)
+	2. Initialize a Wasm AudioWorklet scope on the audio context by calling
+		emscripten_start_wasm_audio_worklet_thread_async(). This shares the Wasm
+		Module, Memory, etc. to the AudioWorklet scope, and establishes the stack
+		space for the Audio Worklet.
+		This needs to be called exactly once during page's lifetime. There is no
+		mechanism in Web Audio to shut down/uninitialize the scope.
+	3. Create one or more of Audio Worklet Processors with the desired name and
+		AudioParam configuration.
+	4. Instantiate Web Audio audio graph nodes from the above created worklet
+		processors, specifying the desired input-output configurations and Wasm-side
+		function callbacks to call for each node.
+	5. Add the graph nodes to the Web Audio graph, and the audio callbacks should
+		begin to fire.
 */
 
 // This function will be called for every fixed-size buffer of audio samples to be processed.
@@ -45,11 +45,11 @@ bool ProcessAudio(int numInputs, const AudioSampleFrame *inputs,
 				  int numParams, const AudioParamFrame *params, 
 				  void *userData)
 {
+	const float volume = *params[0].data;
 	xynth::AudioBufferWASM outputBuffer(outputs);
-	audioProcessor.process(outputBuffer);
+	audioProcessor.process(outputBuffer, volume);
 
 	//int test = static_cast<UserData*>(userData)->test;
-	auto& testParam = params[0];
 
 	return true; // Return false here to shut down.
 }
@@ -86,6 +86,12 @@ void PrepareAudio()
 	audioProcessor.prepare(spec);
 }
 
+EM_JS(void, onAudioProcessorInitialized, (EMSCRIPTEN_AUDIO_WORKLET_NODE_T nodeHandle), {
+    if (typeof onAudioProcessorInitialized === 'function') {
+        onAudioProcessorInitialized(EmAudio[nodeHandle]); // Call the JS function
+    }
+});
+
 EM_JS(void, InitHtmlUi, (EMSCRIPTEN_WEBAUDIO_T audioContext), {
 	// Add a button on the page to toggle playback as a response to user click.
 	let startButton = document.createElement('button');
@@ -113,7 +119,7 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
 	if (!success)
 		return;
 
-	PrepareAudio();
+	PrepareAudio(); // May need to be called on the AudioWorklet thread, currently being called in the main thread.
 
 	// Specify the input and output node configurations for the Wasm Audio
 	// Worklet. A simple setup with single mono output channel here, and no
@@ -131,6 +137,7 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
 	emscripten_audio_node_connect(wasmAudioWorklet, audioContext, 0, 0);
 
 	InitHtmlUi(audioContext);
+	onAudioProcessorInitialized(wasmAudioWorklet);
 }
 
 // This callback will fire when the Wasm Module has been shared to the
@@ -146,6 +153,7 @@ void WebAudioWorkletThreadInitialized(EMSCRIPTEN_WEBAUDIO_T audioContext, bool s
 		.numAudioParams = 1, //audioProcessor.getNumParams(),
 		.audioParamDescriptors = &testParam
 	};
+
 	emscripten_create_wasm_audio_worklet_processor_async(audioContext, &opts, AudioWorkletProcessorCreated, userData);
 }
 
