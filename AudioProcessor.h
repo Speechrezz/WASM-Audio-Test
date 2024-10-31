@@ -41,6 +41,8 @@ class AudioProcessor
 public:
 	AudioProcessor() = default;
 
+	int getNumParams() const { return 1; }
+
 	void prepare(const ProcessSpec& spec)
 	{
 

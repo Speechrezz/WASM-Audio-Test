@@ -12,6 +12,13 @@ struct UserData
 };
 
 UserData userData;
+WebAudioParamDescriptor testParam
+{
+	.defaultValue = 0.f,
+	.minValue = 0.f,
+	.maxValue = 1.f,
+	.automationRate = WEBAUDIO_PARAM_K_RATE
+};
 
 /* Steps to use Wasm-based AudioWorklets:
   1. Create a Web Audio AudioContext either via manual JS code and calling
@@ -42,6 +49,7 @@ bool ProcessAudio(int numInputs, const AudioSampleFrame *inputs,
 	audioProcessor.process(outputBuffer);
 
 	//int test = static_cast<UserData*>(userData)->test;
+	auto& testParam = params[0];
 
 	return true; // Return false here to shut down.
 }
@@ -135,6 +143,8 @@ void WebAudioWorkletThreadInitialized(EMSCRIPTEN_WEBAUDIO_T audioContext, bool s
 
 	WebAudioWorkletProcessorCreateOptions opts = {
 		.name = "audio-processor",
+		.numAudioParams = 1, //audioProcessor.getNumParams(),
+		.audioParamDescriptors = &testParam
 	};
 	emscripten_create_wasm_audio_worklet_processor_async(audioContext, &opts, AudioWorkletProcessorCreated, userData);
 }
