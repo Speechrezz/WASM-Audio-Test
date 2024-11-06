@@ -25,15 +25,15 @@
         // ------------------------------------------
         // ------------------------------------------
         function onAudioProcessorInitialized(node) {
-            console.log(node.parameters.get(0));
-            // Volume Slider
-            const volumeSlider = document.querySelector('#volume');
-            volumeSlider.oninput = (e) => {
-                document.querySelector('#volume_value').innerHTML = parseInt(e.target.value) + '%';
-                node.parameters.get(0).value = parseFloat(e.target.value) / 100;
-            };
-
-            node.parameters.get(0).value = parseFloat(volumeSlider.value) / 100;
+            //console.log(node.parameters.get(0));
+            //// Volume Slider
+            //const volumeSlider = document.querySelector('#volume');
+            //volumeSlider.oninput = (e) => {
+            //    document.querySelector('#volume_value').innerHTML = parseInt(e.target.value) + '%';
+            //    node.parameters.get(0).value = parseFloat(e.target.value) / 100;
+            //};
+            //
+            //node.parameters.get(0).value = parseFloat(volumeSlider.value) / 100;
         }
 
         // ------------------------------------------
@@ -56,7 +56,10 @@
             volumeSlider.value = value;
         }
 
-        function linkParameter(info) {
+        function linkParameter(info, wasmNodeHandle) {
+            console.log(info);
+            console.log(info.id);
+            console.log(info.minValue);
             const htmlParam = document.querySelector(info.id);
             htmlParam.min = info.minValue;
             htmlParam.max = info.maxValue;
@@ -69,7 +72,11 @@
             htmlParam.oninput = (e) => {
                 document.querySelector(info.id + "_value").innerHTML = e.target.value + info.unit;
                 let value = parseFloat(e.target.value);
-                sendParamValueUpdate(info.handle, value);
+                if (window.webkit) {
+                    sendParamValueUpdate(info.handle, value);
+                } else {
+                    wasmNodeHandle.parameters.get(0).value = parseFloat(e.target.value);
+                }
             };
         }
 

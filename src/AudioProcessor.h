@@ -15,7 +15,9 @@ namespace xynth
 class AudioBuffer
 {
   public:
-    AudioBuffer(const AudioSampleFrame *audioFrame)
+    AudioBuffer() = default;
+
+    void resize(const AudioSampleFrame *audioFrame)
     {
         numChannels = audioFrame[0].numberOfChannels;
         numSamples = audioFrame[0].samplesPerChannel;

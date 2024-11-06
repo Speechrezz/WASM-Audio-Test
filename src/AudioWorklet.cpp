@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+
+#include "Synthle.hh"
+
 #include "AudioProcessor.h"
 
 inline xynth::AudioProcessor audioProcessor;
@@ -46,7 +49,8 @@ bool ProcessAudio(int numInputs, const AudioSampleFrame *inputs,
 				  void *userData)
 {
 	const float volume = *params[0].data;
-	xynth::AudioBuffer outputBuffer(outputs);
+	xynth::AudioBuffer outputBuffer;
+    outputBuffer.resize(outputs);
 	audioProcessor.process(outputBuffer, volume);
 
 	//int test = static_cast<UserData*>(userData)->test;
@@ -90,6 +94,11 @@ EM_JS(void, onAudioProcessorInitialized, (EMSCRIPTEN_AUDIO_WORKLET_NODE_T nodeHa
     if (typeof onAudioProcessorInitialized === 'function') {
         onAudioProcessorInitialized(EmAudio[nodeHandle]); // Call the JS function
     }
+});
+
+EM_JS(void, linkParameter, (const char* obj, EMSCRIPTEN_AUDIO_WORKLET_NODE_T nodeHandle), {
+        console.log(UTF8ToString(obj));
+    linkParameter(JSON.parse(UTF8ToString(obj)), EmAudio[nodeHandle]);
 });
 
 EM_JS(void, InitHtmlUi, (EMSCRIPTEN_WEBAUDIO_T audioContext), {
@@ -136,8 +145,24 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
 	// Connect the audio worklet node to the graph.
 	emscripten_audio_node_connect(wasmAudioWorklet, audioContext, 0, 0);
 
+    Synthle m_plugin;
+
 	InitHtmlUi(audioContext);
-	onAudioProcessorInitialized(wasmAudioWorklet);
+    for (int i = 0; i < m_plugin.m_parameters.size(); i++) {
+        auto& param = m_plugin.m_parameters[i];
+        std::string param_obj = "{";
+        param_obj += "\"handle\": " + std::to_string(i) + ", ";
+        param_obj += "\"name\": \"" + param.name + "\", ";
+        param_obj += "\"id\": \"" + param.jsId + "\", ";
+        param_obj += "\"minValue\": " + std::to_string(param.minValue) + ", ";
+        param_obj += "\"maxValue\": " + std::to_string(param.maxValue) + ", ";
+        param_obj += "\"defaultValue\": " + std::to_string(param.defaultValue) + ", ";
+        param_obj += "\"step\": " + std::to_string(param.step) + ", ";
+        param_obj += "\"unit\": \"" + param.unit + "\" ";
+        param_obj += "}";
+        linkParameter(param_obj.c_str(), wasmAudioWorklet);
+    }
+	// onAudioProcessorInitialized(wasmAudioWorklet);
 }
 
 // This callback will fire when the Wasm Module has been shared to the

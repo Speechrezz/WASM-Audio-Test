@@ -4,7 +4,10 @@ project(WASMAudioTest LANGUAGES C CXX VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 23)
 
 if (DEFINED EMSCRIPTEN)
-    add_executable(AudioWorklet src/AudioWorklet.cpp)
+    add_executable(AudioWorklet
+        src/AudioWorklet.cpp
+        src/Synthle.cc
+    )
     set_target_properties(AudioWorklet PROPERTIES LINK_FLAGS "-s AUDIO_WORKLET=1 -s WASM_WORKERS=1 -s WEBAUDIO_DEBUG=1")
 
 else()
