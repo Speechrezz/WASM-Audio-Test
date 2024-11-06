@@ -13,6 +13,7 @@ else()
 
     add_library(${CLAP_TARGET} MODULE
         src/ClapEntry.cpp
+        src/Synthle.cc
         src/CLAP/Gui.mm
     )
     target_link_libraries(${CLAP_TARGET}

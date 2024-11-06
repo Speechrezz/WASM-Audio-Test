@@ -2,7 +2,7 @@
 #include "AudioProcessor.h"
 
 #include "CLAP/Gui.hh"
-#include "ClapPluginType.hh"
+#include "Synthle.hh"
 
 #include <cassert>
 #include <cmath>
@@ -12,26 +12,6 @@
 
 #include <fstream>
 static std::ofstream clap_debug_out("/Users/Joe/Documents/debug_out.txt");
-
-static const clap_plugin_descriptor_t pluginDescriptor = {
-    .clap_version = CLAP_VERSION_INIT,
-    .id = "audio.xynth.Synthle",
-    .name = "Synthle",
-    .vendor = "Xynth Audio",
-    .url = "https://xynth.audio",
-    .manual_url = "https://xynth.audio",
-    .support_url = "https://xynth.audio",
-    .version = "0.0.1",
-    .description = "THE WORST",
-
-    .features =
-        (const char *[]){
-            CLAP_PLUGIN_FEATURE_INSTRUMENT,
-            CLAP_PLUGIN_FEATURE_SYNTHESIZER,
-            CLAP_PLUGIN_FEATURE_STEREO,
-            NULL,
-        },
-};
 
 static const clap_plugin_note_ports_t extensionNotePorts = {
     .count = [](const clap_plugin_t *plugin, bool isInput) -> uint32_t { return isInput ? 1 : 0; },
@@ -67,7 +47,7 @@ static const clap_plugin_audio_ports_t extensionAudioPorts = {
     },
 };
 
-static void PluginProcessEvent(MyPlugin *plugin, const clap_event_header_t *event)
+static void PluginProcessEvent(Synthle *plugin, const clap_event_header_t *event)
 {
     if (event->space_id == CLAP_CORE_EVENT_SPACE_ID)
     {
@@ -117,8 +97,8 @@ static void PluginProcessEvent(MyPlugin *plugin, const clap_event_header_t *even
             const clap_event_param_value_t *valueEvent = (const clap_event_param_value_t *)event;
             uint32_t i = (uint32_t)valueEvent->param_id;
             MutexAcquire(plugin->syncParameters);
-            plugin->m_parameters[i] = valueEvent->value;
-            plugin->m_parameters_changed[i] = true;
+            plugin->m_parameters[i].value = valueEvent->value;
+            plugin->m_parameters[i].changed = true;
             MutexRelease(plugin->syncParameters);
         }
         if (event->type == CLAP_EVENT_PARAM_MOD)
@@ -142,7 +122,10 @@ static void PluginProcessEvent(MyPlugin *plugin, const clap_event_header_t *even
 }
 
 static const clap_plugin_params_t extensionParams = {
-    .count = [](const clap_plugin_t *plugin) -> uint32_t { return MyPlugin::kNParams; },
+    .count = [](const clap_plugin_t *_plugin) -> uint32_t {
+        auto plugin = (Synthle *)_plugin->plugin_data;
+        return plugin->m_real_parameters.size();
+    },
 
     .get_info = [](const clap_plugin_t *_plugin, uint32_t index, clap_param_info_t *information) -> bool {
         if (index == Parameters::Volume)
@@ -165,9 +148,9 @@ static const clap_plugin_params_t extensionParams = {
     },
 
     .get_value = [](const clap_plugin_t *_plugin, clap_id id, double *value) -> bool {
-        MyPlugin *plugin = (MyPlugin *)_plugin->plugin_data;
+        Synthle *plugin = (Synthle *)_plugin->plugin_data;
         uint32_t i = (uint32_t)id;
-        if (i >= MyPlugin::kNParams)
+        if (i >= plugin->m_real_parameters.size())
             return false;
 
         // get_value is called on the main thread, but should return the value of the parameter according to the audio
@@ -178,16 +161,17 @@ static const clap_plugin_params_t extensionParams = {
         // eventually.
 
         MutexAcquire(plugin->syncParameters);
-        *value =
-            plugin->m_parameters_main_thread_changed[i] ? plugin->m_parameters_main_thread[i] : plugin->m_parameters[i];
+        *value = plugin->m_parameters_main_thread[i].changed ? plugin->m_parameters_main_thread[i].value
+                                                             : plugin->m_parameters[i].value;
         MutexRelease(plugin->syncParameters);
         return true;
     },
 
     .value_to_text =
         [](const clap_plugin_t *_plugin, clap_id id, double value, char *display, uint32_t size) {
+            auto plugin = (Synthle *)_plugin->plugin_data;
             uint32_t i = (uint32_t)id;
-            if (i >= MyPlugin::kNParams)
+            if (i >= plugin->m_real_parameters.size())
                 return false;
             snprintf(display, size, "%f", value);
             return true;
@@ -201,7 +185,7 @@ static const clap_plugin_params_t extensionParams = {
 
     .flush =
         [](const clap_plugin_t *_plugin, const clap_input_events_t *in, const clap_output_events_t *out) {
-            MyPlugin *plugin = (MyPlugin *)_plugin->plugin_data;
+            Synthle *plugin = (Synthle *)_plugin->plugin_data;
             const uint32_t eventCount = in->size(in);
 
             // For parameters that have been modified by the main thread, send CLAP_EVENT_PARAM_VALUE events to the
@@ -216,7 +200,7 @@ static const clap_plugin_params_t extensionParams = {
         },
 };
 
-static void PluginRenderAudio(MyPlugin *plugin, uint32_t start, uint32_t end, float *outputL, float *outputR)
+static void PluginRenderAudio(Synthle *plugin, uint32_t start, uint32_t end, float *outputL, float *outputR)
 {
     for (uint32_t index = start; index < end; index++)
     {
@@ -252,7 +236,7 @@ static const clap_plugin_gui_t extensionGUI = {
     .create = [](const clap_plugin_t *_plugin, const char *api, bool isFloating) -> bool {
         if (!extensionGUI.is_api_supported(_plugin, api, isFloating))
             return false;
-        auto plugin = (MyPlugin *)_plugin->plugin_data;
+        auto plugin = (Synthle *)_plugin->plugin_data;
         // We'll define GUICreate in our platform specific code file.
         plugin->m_gui = new xynth::SynthleGui(plugin);
         return true;
@@ -260,7 +244,7 @@ static const clap_plugin_gui_t extensionGUI = {
 
     .destroy =
         [](const clap_plugin_t *_plugin) {
-            auto plugin = (MyPlugin *)_plugin->plugin_data;
+            auto plugin = (Synthle *)_plugin->plugin_data;
             delete plugin->m_gui;
         },
 
@@ -284,7 +268,7 @@ static const clap_plugin_gui_t extensionGUI = {
 
     .set_parent = [](const clap_plugin_t *_plugin, const clap_window_t *window) -> bool {
         assert(0 == strcmp(window->api, GUI_API));
-        auto plugin = (MyPlugin *)_plugin->plugin_data;
+        auto plugin = (Synthle *)_plugin->plugin_data;
 #ifdef __APPLE__
         plugin->m_gui->setParent(window->cocoa);
 #endif
@@ -296,13 +280,13 @@ static const clap_plugin_gui_t extensionGUI = {
     .suggest_title = [](const clap_plugin_t *plugin, const char *title) {},
 
     .show = [](const clap_plugin_t *_plugin) -> bool {
-        auto plugin = (MyPlugin *)_plugin->plugin_data;
+        auto plugin = (Synthle *)_plugin->plugin_data;
         plugin->m_gui->setVisible(true);
         return true;
     },
 
     .hide = [](const clap_plugin_t *_plugin) -> bool {
-        auto plugin = (MyPlugin *)_plugin->plugin_data;
+        auto plugin = (Synthle *)_plugin->plugin_data;
         plugin->m_gui->setVisible(false);
         return true;
     },
@@ -311,7 +295,7 @@ static const clap_plugin_gui_t extensionGUI = {
 static const clap_plugin_timer_support_t extensionTimerSupport = {
     .on_timer =
         [](const clap_plugin_t *_plugin, clap_id timerID) {
-            MyPlugin *plugin = (MyPlugin *)_plugin->plugin_data;
+            Synthle *plugin = (Synthle *)_plugin->plugin_data;
 
             if (plugin->m_gui && plugin->syncAudioToMain())
             {
@@ -321,22 +305,22 @@ static const clap_plugin_timer_support_t extensionTimerSupport = {
 };
 
 static const clap_plugin_t pluginClass = {
-    .desc = &pluginDescriptor,
+    .desc = &Synthle::m_descriptor,
     .plugin_data = nullptr,
 
     .init = [](const clap_plugin *_plugin) -> bool {
-        MyPlugin *plugin = (MyPlugin *)_plugin->plugin_data;
+        Synthle *plugin = (Synthle *)_plugin->plugin_data;
 
         plugin->hostTimerSupport =
             (const clap_host_timer_support_t *)plugin->host->get_extension(plugin->host, CLAP_EXT_TIMER_SUPPORT);
         std::cout << "host timer support? " << plugin->hostTimerSupport << std::endl;
         MutexInitialise(plugin->syncParameters);
 
-        for (uint32_t i = 0; i < MyPlugin::kNParams; i++)
+        for (uint32_t i = 0; i < plugin->m_real_parameters.size(); i++)
         {
             clap_param_info_t information = {};
             extensionParams.get_info(_plugin, i, &information);
-            plugin->m_parameters_main_thread[i] = plugin->m_parameters[i] = information.default_value;
+            plugin->m_parameters_main_thread[i].value = plugin->m_parameters[i].value = information.default_value;
         }
 
         if (plugin->hostTimerSupport && plugin->hostTimerSupport->register_timer)
@@ -350,7 +334,7 @@ static const clap_plugin_t pluginClass = {
 
     .destroy =
         [](const clap_plugin *_plugin) {
-            MyPlugin *plugin = (MyPlugin *)_plugin->plugin_data;
+            Synthle *plugin = (Synthle *)_plugin->plugin_data;
             plugin->voices.Free();
             MutexDestroy(plugin->syncParameters);
 
@@ -363,7 +347,7 @@ static const clap_plugin_t pluginClass = {
 
     .activate = [](const clap_plugin *_plugin, double sampleRate, uint32_t minimumFramesCount,
                    uint32_t maximumFramesCount) -> bool {
-        MyPlugin *plugin = (MyPlugin *)_plugin->plugin_data;
+        Synthle *plugin = (Synthle *)_plugin->plugin_data;
         plugin->sampleRate = sampleRate;
         return true;
     },
@@ -371,7 +355,7 @@ static const clap_plugin_t pluginClass = {
     .deactivate = [](const clap_plugin *_plugin) {},
 
     .start_processing = [](const clap_plugin *_plugin) -> bool {
-        MyPlugin *plugin = (MyPlugin *)_plugin->plugin_data;
+        Synthle *plugin = (Synthle *)_plugin->plugin_data;
         xynth::ProcessSpec spec;
         spec.sampleRate = plugin->sampleRate;
         spec.numChannels = 2;     // FIXME:
@@ -388,12 +372,12 @@ static const clap_plugin_t pluginClass = {
 
     .reset =
         [](const clap_plugin *_plugin) {
-            MyPlugin *plugin = (MyPlugin *)_plugin->plugin_data;
+            Synthle *plugin = (Synthle *)_plugin->plugin_data;
             // FIXME: plugin->voices.Free();
         },
 
     .process = [](const clap_plugin *_plugin, const clap_process_t *process) -> clap_process_status {
-        MyPlugin *plugin = (MyPlugin *)_plugin->plugin_data;
+        Synthle *plugin = (Synthle *)_plugin->plugin_data;
 
         plugin->syncMainToAudio(process->out_events);
 
@@ -435,7 +419,7 @@ static const clap_plugin_t pluginClass = {
         // const float volume = *params[0].data;
 
         plugin->buffer.resize(process);
-        plugin->audioProcessor.process(plugin->buffer, plugin->m_parameters[0]);
+        plugin->audioProcessor.process(plugin->buffer, plugin->m_parameters[0].value);
 
         for (int i = 0; i < plugin->voices.Length(); i++)
         {
@@ -485,19 +469,19 @@ static const clap_plugin_factory_t pluginFactory = {
     .get_plugin_descriptor = [](const clap_plugin_factory *factory,
                                 uint32_t index) -> const clap_plugin_descriptor_t * {
         // Return a pointer to our pluginDescriptor definition.
-        return index == 0 ? &pluginDescriptor : nullptr;
+        return index == 0 ? &Synthle::m_descriptor : nullptr;
     },
 
     .create_plugin = [](const clap_plugin_factory *factory, const clap_host_t *host,
                         const char *pluginID) -> const clap_plugin_t * {
-        if (!clap_version_is_compatible(host->clap_version) || strcmp(pluginID, pluginDescriptor.id))
+        if (!clap_version_is_compatible(host->clap_version) || strcmp(pluginID, Synthle::m_descriptor.id))
         {
             return nullptr;
         }
         std::cout.rdbuf(clap_debug_out.rdbuf());
         // Allocate the plugin structure, and fill in the plugin information from
         // the pluginClass variable.
-        MyPlugin *plugin = new MyPlugin;
+        Synthle *plugin = new Synthle;
         plugin->host = host;
         plugin->plugin = pluginClass;
         plugin->plugin.plugin_data = plugin;

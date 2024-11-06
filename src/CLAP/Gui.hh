@@ -7,17 +7,17 @@
 #endif
 
 // Forward Declaration
-class MyPlugin;
+class Synthle;
 namespace xynth
 {
 struct SynthleGuiPimpl;
 class SynthleGui
 {
     SynthleGuiPimpl *m_pimpl;
-    MyPlugin *m_plugin = nullptr;
+    Synthle *m_plugin = nullptr;
 
   public:
-    SynthleGui(MyPlugin *plugin);
+    SynthleGui(Synthle *plugin);
     ~SynthleGui();
 
     void paint();

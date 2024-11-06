@@ -1,6 +1,6 @@
 #include "Gui.hh"
 
-#include "../ClapPluginType.hh"
+#include "../Synthle.hh"
 
 #import <WebKit/WebKit.h>
 #include <iostream>
@@ -9,14 +9,14 @@
 // you add the subsecquent classes in angle-brackets. This is not a template.
 @interface HTMLView : NSView <WKScriptMessageHandler>
 {
-    MyPlugin *m_plugin;
+    Synthle *m_plugin;
 }
 @property(nonatomic, strong) WKWebView *webView;
 - (void)loadHTMLContent:(NSString *)htmlString;
 @end
 
 @implementation HTMLView
-- (instancetype)initWithFrame:(NSRect)frameRect plugin:(MyPlugin *)plugin
+- (instancetype)initWithFrame:(NSRect)frameRect plugin:(Synthle *)plugin
 {
     self = [super initWithFrame:frameRect];
     if (self)
@@ -143,7 +143,7 @@ struct SynthleGuiPimpl
     }
 };
 
-SynthleGui::SynthleGui(MyPlugin *plugin)
+SynthleGui::SynthleGui(Synthle *plugin)
 {
     std::string html = R"""(
 <!DOCTYPE html>
@@ -154,6 +154,10 @@ SynthleGui::SynthleGui(MyPlugin *plugin)
 <body>
     <h1>Hello, World!</h1>
     Choose volume:
+
+    <input style="width: 300px;" type="range" min="0" max="100" value="30" class="slider" id="volume">
+    <span id="volumeValue">30%</span><br>
+
     <input style="width: 300px;" type="range" min="0" max="100" value="30" class="slider" id="volume">
     <span id="volumeValue">30%</span><br>
 
@@ -185,10 +189,7 @@ SynthleGui::SynthleGui(MyPlugin *plugin)
         window.webkit.messageHandlers.jsHandler.postMessage({
             action: "initializeValues",
         });
-
-        // Call into C++
-        let vol_id = getParam("volume");
-
+        getParam();
     });
 
     </script>
@@ -213,10 +214,10 @@ void SynthleGui::updateGuiValues()
 {
     // Updates all the parameters
     const auto &params = m_plugin->m_parameters_main_thread;
-    for (int i = 0; i < MyPlugin::kNParams; i++)
+    for (int i = 0; i < m_plugin->m_real_parameters.size(); i++)
     {
-        std::cout << params[i] << std::endl;
-        [m_pimpl->m_htmlView updateParamWithId:i andValue:params[i]];
+        std::cout << params[i].value << std::endl;
+        [m_pimpl->m_htmlView updateParamWithId:i andValue:params[i].value];
     }
 }
 
@@ -226,10 +227,10 @@ void SynthleGui::paint()
         return;
 
     const auto &params = m_plugin->m_parameters_main_thread;
-    for (int i = 0; i < MyPlugin::kNParams; i++)
+    for (int i = 0; i < m_plugin->m_real_parameters.size(); i++)
     {
-        std::cout << params[i] << std::endl;
-        [m_pimpl->m_htmlView updateParamWithId:i andValue:params[i]];
+        std::cout << params[i].value << std::endl;
+        [m_pimpl->m_htmlView updateParamWithId:i andValue:params[i].value];
     }
 }
 

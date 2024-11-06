@@ -16,6 +16,7 @@ enum Parameters
 {
     Volume = 0
 };
+
 struct Voice
 {
     bool held;
@@ -24,9 +25,34 @@ struct Voice
     float phase;
 };
 
-struct MyPlugin
+struct Synthle
 {
-    static constexpr int kNParams = 1;
+    constexpr static const clap_plugin_descriptor_t m_descriptor = {
+        .clap_version = CLAP_VERSION_INIT,
+        .id = "audio.xynth.Synthle",
+        .name = "Synthle",
+        .vendor = "Xynth Audio",
+        .url = "https://xynth.audio",
+        .manual_url = "https://xynth.audio",
+        .support_url = "https://xynth.audio",
+        .version = "0.0.1",
+        .description = "THE WORST",
+
+        .features =
+            (const char *[]){
+                CLAP_PLUGIN_FEATURE_INSTRUMENT,
+                CLAP_PLUGIN_FEATURE_SYNTHESIZER,
+                CLAP_PLUGIN_FEATURE_STEREO,
+                NULL,
+            },
+    };
+
+    void addParam(const std::string &name, const std::string &jsId, const float minValue, const float maxValue,
+                  const float defaultValue, const float step, const std::string &unit);
+
+    Synthle();
+    ~Synthle();
+
     clap_plugin_t plugin;
     const clap_host_t *host;
     float sampleRate;
@@ -37,23 +63,37 @@ struct MyPlugin
     const clap_host_timer_support_t *hostTimerSupport;
     clap_id timerID;
 
+    struct InternalParam
+    {
+        float value;
+        bool changed;
+    };
+
+    struct Param
+    {
+        const std::string &name;
+        const std::string &jsId;
+        const float minValue;
+        const float maxValue;
+        const float defaultValue;
+        const float step;
+        const std::string &unit;
+    };
+
+    std::vector<Param> m_real_parameters;
+
     // If the audio thread updates parameters it will update this array.
-    float m_parameters[kNParams];
-    bool m_parameters_changed[kNParams];
+    std::vector<InternalParam> m_parameters;
     inline void updateParamAudioThread(int id, float value)
     {
-        m_parameters[id] = value;
-        m_parameters_changed[id] = true;
+        m_parameters[id] = {value, true};
     }
 
     // If the main (GUI) thread updates parameters it will update this array.
-    float m_parameters_main_thread[kNParams];
-    bool m_parameters_main_thread_changed[kNParams];
+    std::vector<InternalParam> m_parameters_main_thread;
     inline void updateParamMainThread(int id, float value)
     {
-        std::cout << "ID: " << id << " Value: " << value << std::endl;
-        m_parameters_main_thread[id] = value;
-        m_parameters_main_thread_changed[id] = true;
+        m_parameters_main_thread[id] = {value, true};
     }
 
     bool syncAudioToMain()
@@ -61,12 +101,12 @@ struct MyPlugin
         bool any_changed = false;
         MutexAcquire(syncParameters);
 
-        for (uint32_t i = 0; i < MyPlugin::kNParams; i++)
+        for (uint32_t i = 0; i < m_real_parameters.size(); i++)
         {
-            if (m_parameters_changed[i])
+            if (m_parameters[i].changed)
             {
-                m_parameters_main_thread[i] = m_parameters[i];
-                m_parameters_changed[i] = false;
+                m_parameters_main_thread[i].value = m_parameters[i].value;
+                m_parameters[i].changed = false;
                 any_changed = true;
             }
         }
@@ -79,12 +119,12 @@ struct MyPlugin
     {
         MutexAcquire(syncParameters);
 
-        for (uint32_t i = 0; i < MyPlugin::kNParams; i++)
+        for (uint32_t i = 0; i < m_real_parameters.size(); i++)
         {
-            if (m_parameters_main_thread_changed[i])
+            if (m_parameters_main_thread[i].changed)
             {
-                m_parameters[i] = m_parameters_main_thread[i];
-                m_parameters_main_thread_changed[i] = false;
+                m_parameters[i].value = m_parameters_main_thread[i].value;
+                m_parameters_main_thread[i].changed = false;
 
                 clap_event_param_value_t event = {};
                 event.header.size = sizeof(event);
@@ -98,7 +138,7 @@ struct MyPlugin
                 event.port_index = -1;
                 event.channel = -1;
                 event.key = -1;
-                event.value = m_parameters[i];
+                event.value = m_parameters[i].value;
                 out->try_push(out, &event.header);
             }
         }
