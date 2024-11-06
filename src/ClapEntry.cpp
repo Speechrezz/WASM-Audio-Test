@@ -97,8 +97,8 @@ static void PluginProcessEvent(Synthle *plugin, const clap_event_header_t *event
             const clap_event_param_value_t *valueEvent = (const clap_event_param_value_t *)event;
             uint32_t i = (uint32_t)valueEvent->param_id;
             MutexAcquire(plugin->syncParameters);
-            plugin->m_parameters[i].value = valueEvent->value;
-            plugin->m_parameters[i].changed = true;
+            plugin->m_parameters[i].audio_thread.value = valueEvent->value;
+            plugin->m_parameters[i].audio_thread.changed = true;
             MutexRelease(plugin->syncParameters);
         }
         if (event->type == CLAP_EVENT_PARAM_MOD)
@@ -124,33 +124,35 @@ static void PluginProcessEvent(Synthle *plugin, const clap_event_header_t *event
 static const clap_plugin_params_t extensionParams = {
     .count = [](const clap_plugin_t *_plugin) -> uint32_t {
         auto plugin = (Synthle *)_plugin->plugin_data;
-        return plugin->m_real_parameters.size();
+        return plugin->m_parameters.size();
     },
 
     .get_info = [](const clap_plugin_t *_plugin, uint32_t index, clap_param_info_t *information) -> bool {
-        if (index == Parameters::Volume)
+        auto plugin = (Synthle *)_plugin->plugin_data;
+
+        if (index >= plugin->m_parameters.size())
+            return false;
+
+        auto &param = plugin->m_parameters[index];
         {
             memset(information, 0, sizeof(clap_param_info_t));
             information->id = index;
             // These flags enable polyphonic modulation.
             information->flags =
                 CLAP_PARAM_IS_AUTOMATABLE | CLAP_PARAM_IS_MODULATABLE | CLAP_PARAM_IS_MODULATABLE_PER_NOTE_ID;
-            information->min_value = 0.0f;
-            information->max_value = 1.0f;
-            information->default_value = 0.5f;
-            strcpy(information->name, "Volume");
-            return true;
+            information->min_value = param.minValue;
+            information->max_value = param.maxValue;
+            information->default_value = param.defaultValue;
+            strcpy(information->name, param.name.c_str());
         }
-        else
-        {
-            return false;
-        }
+
+        return true;
     },
 
     .get_value = [](const clap_plugin_t *_plugin, clap_id id, double *value) -> bool {
         Synthle *plugin = (Synthle *)_plugin->plugin_data;
         uint32_t i = (uint32_t)id;
-        if (i >= plugin->m_real_parameters.size())
+        if (i >= plugin->m_parameters.size())
             return false;
 
         // get_value is called on the main thread, but should return the value of the parameter according to the audio
@@ -161,8 +163,8 @@ static const clap_plugin_params_t extensionParams = {
         // eventually.
 
         MutexAcquire(plugin->syncParameters);
-        *value = plugin->m_parameters_main_thread[i].changed ? plugin->m_parameters_main_thread[i].value
-                                                             : plugin->m_parameters[i].value;
+        *value = plugin->m_parameters[i].gui_thread.changed ? plugin->m_parameters[i].gui_thread.value
+                                                            : plugin->m_parameters[i].audio_thread.value;
         MutexRelease(plugin->syncParameters);
         return true;
     },
@@ -171,7 +173,7 @@ static const clap_plugin_params_t extensionParams = {
         [](const clap_plugin_t *_plugin, clap_id id, double value, char *display, uint32_t size) {
             auto plugin = (Synthle *)_plugin->plugin_data;
             uint32_t i = (uint32_t)id;
-            if (i >= plugin->m_real_parameters.size())
+            if (i >= plugin->m_parameters.size())
                 return false;
             snprintf(display, size, "%f", value);
             return true;
@@ -316,11 +318,12 @@ static const clap_plugin_t pluginClass = {
         std::cout << "host timer support? " << plugin->hostTimerSupport << std::endl;
         MutexInitialise(plugin->syncParameters);
 
-        for (uint32_t i = 0; i < plugin->m_real_parameters.size(); i++)
+        for (uint32_t i = 0; i < plugin->m_parameters.size(); i++)
         {
             clap_param_info_t information = {};
             extensionParams.get_info(_plugin, i, &information);
-            plugin->m_parameters_main_thread[i].value = plugin->m_parameters[i].value = information.default_value;
+            plugin->m_parameters[i].gui_thread.value = plugin->m_parameters[i].audio_thread.value =
+                information.default_value;
         }
 
         if (plugin->hostTimerSupport && plugin->hostTimerSupport->register_timer)
@@ -419,7 +422,7 @@ static const clap_plugin_t pluginClass = {
         // const float volume = *params[0].data;
 
         plugin->buffer.resize(process);
-        plugin->audioProcessor.process(plugin->buffer, plugin->m_parameters[0].value);
+        plugin->audioProcessor.process(plugin->buffer, plugin->m_parameters[0].audio_thread.value);
 
         for (int i = 0; i < plugin->voices.Length(); i++)
         {

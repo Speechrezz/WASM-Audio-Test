@@ -1,6 +1,7 @@
 #include "Gui.hh"
 
 #include "../Synthle.hh"
+#include "../index.html.h"
 
 #import <WebKit/WebKit.h>
 #include <iostream>
@@ -50,7 +51,6 @@
     if ([message.name isEqualToString:@"jsHandler"])
     {
         NSDictionary *message_body = message.body;
-
         if ([message_body isKindOfClass:[NSDictionary class]])
         {
             NSString *action = message_body[@"action"];
@@ -66,18 +66,66 @@
             }
             else if ([action isEqualToString:@"initializeValues"])
             {
-                std::cout << "init" << std::endl;
                 m_plugin->m_gui->updateGuiValues();
+            }
+            else if ([action isEqualToString:@"sendPluginInfo"])
+            {
+                [self sendPluginInfo];
+            }
+            else if ([action isEqualToString:@"getParameterInfo"])
+            {
+                // [self
+                // std::cout << "init" << std::endl;
+                // m_plugin->m_gui->updateGuiValues();
             }
         }
     }
 }
 
 // This method calls a function in JavaScript
-- (void)updateParamWithId:(int)param_id andValue:(float)value
+- (void)sendPluginInfo
 {
-    // Builds the string to execute
-    NSString *js = [NSString stringWithFormat:@"receiveParamValueUpdate('%i', '%f');", param_id, value];
+
+    for (int i = 0; i < m_plugin->m_parameters.size(); i++)
+    {
+        auto &param = m_plugin->m_parameters[i];
+
+        NSString *name = [NSString stringWithCString:param.name.c_str() encoding:NSASCIIStringEncoding];
+        NSString *param_id = [NSString stringWithCString:param.jsId.c_str() encoding:NSASCIIStringEncoding];
+        NSString *unit = [NSString stringWithCString:param.unit.c_str() encoding:NSASCIIStringEncoding];
+
+        // Builds the string to execute
+        NSString *js = [NSString
+            stringWithFormat:@"linkParameter({handle: %i, name: '%@', id: '%@', minValue: '%f', maxValue: "
+                             @"'%f', defaultValue: '%f', step: %f, unit: '%@'});",
+                             i, name, param_id, param.minValue, param.maxValue, param.defaultValue, param.step, unit];
+        [self.webView evaluateJavaScript:js
+                       completionHandler:^(id _Nullable result, NSError *_Nullable error) {
+                         if (error)
+                         {
+                             // std::cout << "error executing js" << std::endl;
+                             // NSLog(@"Error executing JavaScript: %@", error.localizedDescription);
+                         }
+                       }];
+    }
+
+    // Updates all the parameters
+    const auto &params = m_plugin->m_parameters;
+    for (int i = 0; i < m_plugin->m_parameters.size(); i++)
+    {
+        std::cout << params[i].audio_thread.value << std::endl;
+        [self updateParamWithId:i andValue:params[i].audio_thread.value];
+    }
+}
+
+// This method calls a function in JavaScript
+- (void)updateParamWithId:(int)i andValue:(float)value
+{
+    // Get the JS ID for the parameter.
+    auto &param = m_plugin->m_parameters[i];
+    NSString *param_id = [NSString stringWithCString:param.jsId.c_str() encoding:NSASCIIStringEncoding];
+
+    NSString *js = [NSString stringWithFormat:@"receiveParamValueUpdate('%@', '%f');", param_id, value];
     [self.webView evaluateJavaScript:js
                    completionHandler:^(id _Nullable result, NSError *_Nullable error) {
                      if (error)
@@ -145,61 +193,10 @@ struct SynthleGuiPimpl
 
 SynthleGui::SynthleGui(Synthle *plugin)
 {
-    std::string html = R"""(
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Test</title>
-</head>
-<body>
-    <h1>Hello, World!</h1>
-    Choose volume:
-
-    <input style="width: 300px;" type="range" min="0" max="100" value="30" class="slider" id="volume">
-    <span id="volumeValue">30%</span><br>
-
-    <input style="width: 300px;" type="range" min="0" max="100" value="30" class="slider" id="volume">
-    <span id="volumeValue">30%</span><br>
-
-    <script>
-    function sendParamValueUpdate(_id, _value) {
-        window.webkit.messageHandlers.jsHandler.postMessage({
-            action: "sendParamValueUpdate",
-            id: _id,
-            value: _value
-        });
-    }
-
-    function receiveParamValueUpdate(_id, _value) {
-        // FIXME: Ignoring _id right now.
-        const volumeSlider = document.querySelector('#volume');
-        document.querySelector('#volumeValue').innerHTML = parseInt(_value * 100) + '%';
-        volumeSlider.value = _value * 100;
-    }
-
-    const volumeSlider = document.querySelector('#volume');
-    volumeSlider.oninput = (e) => {
-      document.querySelector('#volumeValue').innerHTML = parseInt(e.target.value) + '%';
-      let value = parseFloat(e.target.value) / 100;
-      sendParamValueUpdate(0, value);
-    };
-
-    document.addEventListener("DOMContentLoaded", function(event) {
-        // Send a request to fully update parameters.
-        window.webkit.messageHandlers.jsHandler.postMessage({
-            action: "initializeValues",
-        });
-        getParam();
-    });
-
-    </script>
-</body>
-</html>
-    )""";
     m_pimpl = new SynthleGuiPimpl;
     m_pimpl->m_htmlView = [[HTMLView alloc] initWithFrame:NSMakeRect(0, 0, GUI_WIDTH, GUI_HEIGHT) plugin:plugin];
-
-    NSString *html_ns_string = [NSString stringWithCString:html.c_str()];
+    std::string html = (const char *)index_html;
+    NSString *html_ns_string = [NSString stringWithCString:html.c_str() encoding:NSASCIIStringEncoding];
     [m_pimpl->m_htmlView loadHTMLContent:html_ns_string];
     m_plugin = plugin;
 }
@@ -207,18 +204,12 @@ SynthleGui::SynthleGui(Synthle *plugin)
 SynthleGui::~SynthleGui()
 {
     m_pimpl->stopDisplayLink();
+    [m_pimpl->m_htmlView release];
     delete m_pimpl;
 }
 
 void SynthleGui::updateGuiValues()
 {
-    // Updates all the parameters
-    const auto &params = m_plugin->m_parameters_main_thread;
-    for (int i = 0; i < m_plugin->m_real_parameters.size(); i++)
-    {
-        std::cout << params[i].value << std::endl;
-        [m_pimpl->m_htmlView updateParamWithId:i andValue:params[i].value];
-    }
 }
 
 void SynthleGui::paint()
@@ -226,11 +217,11 @@ void SynthleGui::paint()
     if (!m_plugin->syncAudioToMain())
         return;
 
-    const auto &params = m_plugin->m_parameters_main_thread;
-    for (int i = 0; i < m_plugin->m_real_parameters.size(); i++)
+    const auto &params = m_plugin->m_parameters;
+    for (int i = 0; i < m_plugin->m_parameters.size(); i++)
     {
-        std::cout << params[i].value << std::endl;
-        [m_pimpl->m_htmlView updateParamWithId:i andValue:params[i].value];
+        std::cout << params[i].gui_thread.value << std::endl;
+        [m_pimpl->m_htmlView updateParamWithId:i andValue:params[i].gui_thread.value];
     }
 }
 

@@ -1,3 +1,6 @@
+cd src
+xxd -i index.html > index.html.h
+cd ..
 mkdir -p build/clap && cd build/clap
 cmake cmake ../../
 cd ../../

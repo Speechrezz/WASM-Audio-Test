@@ -12,11 +12,6 @@ namespace xynth
 class SynthleGui;
 }
 
-enum Parameters
-{
-    Volume = 0
-};
-
 struct Voice
 {
     bool held;
@@ -63,37 +58,39 @@ struct Synthle
     const clap_host_timer_support_t *hostTimerSupport;
     clap_id timerID;
 
-    struct InternalParam
-    {
-        float value;
-        bool changed;
-    };
-
     struct Param
     {
-        const std::string &name;
-        const std::string &jsId;
-        const float minValue;
-        const float maxValue;
-        const float defaultValue;
-        const float step;
-        const std::string &unit;
+        std::string name;
+        std::string jsId;
+        float minValue;
+        float maxValue;
+        float defaultValue;
+        float step;
+        std::string unit;
+
+        // FIXME: Should be private
+        struct InternalData
+        {
+            float value;
+            bool changed;
+        };
+
+        InternalData audio_thread;
+        InternalData gui_thread;
     };
 
-    std::vector<Param> m_real_parameters;
+    std::vector<Param> m_parameters;
 
     // If the audio thread updates parameters it will update this array.
-    std::vector<InternalParam> m_parameters;
     inline void updateParamAudioThread(int id, float value)
     {
-        m_parameters[id] = {value, true};
+        m_parameters[id].audio_thread = {value, true};
     }
 
     // If the main (GUI) thread updates parameters it will update this array.
-    std::vector<InternalParam> m_parameters_main_thread;
     inline void updateParamMainThread(int id, float value)
     {
-        m_parameters_main_thread[id] = {value, true};
+        m_parameters[id].gui_thread = {value, true};
     }
 
     bool syncAudioToMain()
@@ -101,12 +98,12 @@ struct Synthle
         bool any_changed = false;
         MutexAcquire(syncParameters);
 
-        for (uint32_t i = 0; i < m_real_parameters.size(); i++)
+        for (uint32_t i = 0; i < m_parameters.size(); i++)
         {
-            if (m_parameters[i].changed)
+            if (m_parameters[i].audio_thread.changed)
             {
-                m_parameters_main_thread[i].value = m_parameters[i].value;
-                m_parameters[i].changed = false;
+                m_parameters[i].gui_thread.value = m_parameters[i].audio_thread.value;
+                m_parameters[i].audio_thread.changed = false;
                 any_changed = true;
             }
         }
@@ -119,12 +116,12 @@ struct Synthle
     {
         MutexAcquire(syncParameters);
 
-        for (uint32_t i = 0; i < m_real_parameters.size(); i++)
+        for (uint32_t i = 0; i < m_parameters.size(); i++)
         {
-            if (m_parameters_main_thread[i].changed)
+            if (m_parameters[i].gui_thread.changed)
             {
-                m_parameters[i].value = m_parameters_main_thread[i].value;
-                m_parameters_main_thread[i].changed = false;
+                m_parameters[i].audio_thread.value = m_parameters[i].gui_thread.value;
+                m_parameters[i].gui_thread.changed = false;
 
                 clap_event_param_value_t event = {};
                 event.header.size = sizeof(event);
@@ -138,7 +135,7 @@ struct Synthle
                 event.port_index = -1;
                 event.channel = -1;
                 event.key = -1;
-                event.value = m_parameters[i].value;
+                event.value = m_parameters[i].audio_thread.value;
                 out->try_push(out, &event.header);
             }
         }

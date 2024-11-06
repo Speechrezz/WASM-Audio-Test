@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 if (DEFINED EMSCRIPTEN)
     add_executable(AudioWorklet src/AudioWorklet.cpp)
     set_target_properties(AudioWorklet PROPERTIES LINK_FLAGS "-s AUDIO_WORKLET=1 -s WASM_WORKERS=1 -s WEBAUDIO_DEBUG=1")
+
 else()
     # add_executable(AudioWorklet src/AudioWorklet.cpp)
     set(CLAP_TARGET Synthle)
@@ -16,6 +17,7 @@ else()
         src/Synthle.cc
         src/CLAP/Gui.mm
     )
+
     target_link_libraries(${CLAP_TARGET}
         # All needed for macOS GUI.
         "-framework WebKit"

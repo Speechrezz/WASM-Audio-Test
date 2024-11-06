@@ -41,14 +41,7 @@ class AudioBuffer
     int numChannels = 0, numSamples = 0;
 };
 #else
-// Stolen from https://github.com/emscripten-core/emscripten/blob/main/system/include/emscripten/webaudio.h
-// typedef struct AudioSampleFrame
-// {
-//     const int numberOfChannels;
-//     const int samplesPerChannel;
-//     float *data;
-// } AudioSampleFrame;
-//
+
 class AudioBuffer
 {
   public:
