@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/Users/joe/Documents/GitHub/WASM-Audio-Test/build/wasm",
+  "command": "/opt/homebrew/Cellar/emscripten/3.1.71/libexec/em++   -std=gnu++23 -o CMakeFiles/AudioWorklet.dir/src/AudioWorklet.cpp.o -c /Users/joe/Documents/GitHub/WASM-Audio-Test/src/AudioWorklet.cpp",
+  "file": "/Users/joe/Documents/GitHub/WASM-Audio-Test/src/AudioWorklet.cpp",
+  "output": "CMakeFiles/AudioWorklet.dir/src/AudioWorklet.cpp.o"
+}
+]
