@@ -13,25 +13,86 @@
     <input style="width: 300px;" type="range" class="slider" id="volume">
     <span id="volume_value">30%</span><br>
 
+    <span id="volume2_name"></span>
+    <input style="width: 300px;" type="range" class="slider" id="volume2">
+    <span id="volume2_value">30%</span><br>
+
+
+    <script>
+        // ------------------------------------------
+        // ------------------------------------------
+        // WASM
+        // ------------------------------------------
+        // ------------------------------------------
+        function onAudioProcessorInitialized(node) {
+            console.log(node.parameters.get(0));
+            // Volume Slider
+            const volumeSlider = document.querySelector('#volume');
+            volumeSlider.oninput = (e) => {
+                document.querySelector('#volume_value').innerHTML = parseInt(e.target.value) + '%';
+                node.parameters.get(0).value = parseFloat(e.target.value) / 100;
+            };
+
+            node.parameters.get(0).value = parseFloat(volumeSlider.value) / 100;
+        }
+
+        // ------------------------------------------
+        // ------------------------------------------
+        // WEBVIEW
+        // ------------------------------------------
+        // ------------------------------------------
+
+        function sendParamValueUpdate(_id, _value) {
+            window.webkit.messageHandlers.jsHandler.postMessage({
+                action: "sendParamValueUpdate",
+                id: _id,
+                value: _value
+            });
+        }
+
+        function receiveParamValueUpdate(id, value) {
+            const volumeSlider = document.querySelector(id);
+            document.querySelector(id + "_value").innerHTML = value;
+            volumeSlider.value = value;
+        }
+
+        function linkParameter(info) {
+            const htmlParam = document.querySelector(info.id);
+            htmlParam.min = info.minValue;
+            htmlParam.max = info.maxValue;
+            htmlParam.value = info.defaultValue;
+            htmlParam.step = info.step;
+
+            document.querySelector(info.id + "_name").innerHTML = htmlParam.name;
+
+            // This will call into the C++ to update the value.
+            htmlParam.oninput = (e) => {
+                document.querySelector(info.id + "_value").innerHTML = e.target.value + info.unit;
+                let value = parseFloat(e.target.value);
+                sendParamValueUpdate(info.handle, value);
+            };
+        }
+
+        function setup() {
+            // Send a request to get the plugin parameter info
+            window.webkit.messageHandlers.jsHandler.postMessage({
+                action: "sendPluginInfo"
+            });
+
+            // Send a request to fully update parameters.
+            window.webkit.messageHandlers.jsHandler.postMessage({
+                action: "initializeValues",
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function (event) {
+            // Not robust but this does check if we are in a macOS webview
+            if (window.webkit) {
+                setup();
+            }
+        });
+
+    </script>
 </body>
-
-<script>
-
-    function onAudioProcessorInitialized(node) {
-        console.log(node.parameters.get(0));
-        document.querySelector('#pitch').oninput = (e) => {
-            document.querySelector('#pitchValue').innerHTML = parseInt(e.target.value);
-        };
-
-        // Volume Slider
-        const volumeSlider = document.querySelector('#volume');
-        volumeSlider.oninput = (e) => {
-            document.querySelector('#volumeValue').innerHTML = parseInt(e.target.value) + '%';
-            node.parameters.get(0).value = parseFloat(e.target.value) / 100;
-        };
-
-        node.parameters.get(0).value = parseFloat(volumeSlider.value) / 100;
-    }
-</script>
 
 </html>
