@@ -17,31 +17,8 @@
     <input style="width: 300px;" type="range" class="slider" id="volume2">
     <span id="volume2_value">30%</span><br>
 
-
     <script>
-        // ------------------------------------------
-        // ------------------------------------------
-        // WASM
-        // ------------------------------------------
-        // ------------------------------------------
-        function onAudioProcessorInitialized(node) {
-            //console.log(node.parameters.get(0));
-            //// Volume Slider
-            //const volumeSlider = document.querySelector('#volume');
-            //volumeSlider.oninput = (e) => {
-            //    document.querySelector('#volume_value').innerHTML = parseInt(e.target.value) + '%';
-            //    node.parameters.get(0).value = parseFloat(e.target.value) / 100;
-            //};
-            //
-            //node.parameters.get(0).value = parseFloat(volumeSlider.value) / 100;
-        }
-
-        // ------------------------------------------
-        // ------------------------------------------
-        // WEBVIEW
-        // ------------------------------------------
-        // ------------------------------------------
-
+        // CLAP
         function sendParamValueUpdate(_id, _value) {
             window.webkit.messageHandlers.jsHandler.postMessage({
                 action: "sendParamValueUpdate",
@@ -50,12 +27,14 @@
             });
         }
 
+        // CLAP
         function receiveParamValueUpdate(id, value) {
             const volumeSlider = document.querySelector(id);
             document.querySelector(id + "_value").innerHTML = value;
             volumeSlider.value = value;
         }
 
+        // WASM + CLAP
         function linkParameter(info, wasmNodeHandle) {
             console.log(info);
             console.log(info.id);
@@ -72,14 +51,15 @@
             htmlParam.oninput = (e) => {
                 document.querySelector(info.id + "_value").innerHTML = e.target.value + info.unit;
                 let value = parseFloat(e.target.value);
-                if (window.webkit) {
-                    sendParamValueUpdate(info.handle, value);
-                } else {
+                if (wasmNodeHandle) {
                     wasmNodeHandle.parameters.get(0).value = parseFloat(e.target.value);
+                } else {
+                    sendParamValueUpdate(info.handle, value);
                 }
             };
         }
 
+        // CLAP
         function setup() {
             // Send a request to get the plugin parameter info
             window.webkit.messageHandlers.jsHandler.postMessage({
@@ -93,7 +73,6 @@
         }
 
         document.addEventListener("DOMContentLoaded", function (event) {
-            // Not robust but this does check if we are in a macOS webview
             if (window.webkit) {
                 setup();
             }
