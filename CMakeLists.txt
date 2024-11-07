@@ -8,8 +8,8 @@ if (DEFINED EMSCRIPTEN)
         src/AudioWorklet.cpp
         src/Synthle.cc
     )
-    set_target_properties(AudioWorklet PROPERTIES LINK_FLAGS "-s AUDIO_WORKLET=1 -s WASM_WORKERS=1 -s WEBAUDIO_DEBUG=1")
-
+    set_target_properties(AudioWorklet PROPERTIES LINK_FLAGS "--bind -sSHARED_MEMORY=1 -sPTHREAD_POOL_SIZE=4 -sAUDIO_WORKLET=1 -sWASM_WORKERS=1 -sWEBAUDIO_DEBUG=1")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -matomics -mbulk-memory")
 else()
     # add_executable(AudioWorklet src/AudioWorklet.cpp)
     set(CLAP_TARGET Synthle)

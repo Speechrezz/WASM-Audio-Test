@@ -1,4 +1,5 @@
-#include <emscripten/webaudio.h>
+
+#include <emscripten/val.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -90,15 +91,9 @@ void PrepareAudio()
 	audioProcessor.prepare(spec);
 }
 
-EM_JS(void, onAudioProcessorInitialized, (EMSCRIPTEN_AUDIO_WORKLET_NODE_T nodeHandle), {
-    if (typeof onAudioProcessorInitialized === 'function') {
-        onAudioProcessorInitialized(EmAudio[nodeHandle]); // Call the JS function
-    }
-});
-
-EM_JS(void, linkParameter, (const char* obj, EMSCRIPTEN_AUDIO_WORKLET_NODE_T nodeHandle), {
-        console.log(UTF8ToString(obj));
-    linkParameter(JSON.parse(UTF8ToString(obj)), EmAudio[nodeHandle]);
+EM_JS(void, linkParameter, (emscripten::val obj, EMSCRIPTEN_AUDIO_WORKLET_NODE_T nodeHandle), {
+    // linkParameter(JSON.parse(UTF8ToString(obj)), EmAudio[nodeHandle]);
+    linkParameter(JSON.parse(obj), EmAudio[nodeHandle]);
 });
 
 EM_JS(void, InitHtmlUi, (EMSCRIPTEN_WEBAUDIO_T audioContext), {
@@ -133,7 +128,7 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
 	// Specify the input and output node configurations for the Wasm Audio
 	// Worklet. A simple setup with single mono output channel here, and no
 	// inputs.
-	int outputChannelCounts[1] = {getNumberOfChannels()};
+	int outputChannelCounts[1] = { getNumberOfChannels() };
 
 	EmscriptenAudioWorkletNodeCreateOptions options = {
 		.numberOfInputs = 0,
@@ -150,19 +145,20 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
 	InitHtmlUi(audioContext);
     for (int i = 0; i < m_plugin.m_parameters.size(); i++) {
         auto& param = m_plugin.m_parameters[i];
-        std::string param_obj = "{";
-        param_obj += "\"handle\": " + std::to_string(i) + ", ";
-        param_obj += "\"name\": \"" + param.name + "\", ";
-        param_obj += "\"id\": \"" + param.jsId + "\", ";
-        param_obj += "\"minValue\": " + std::to_string(param.minValue) + ", ";
-        param_obj += "\"maxValue\": " + std::to_string(param.maxValue) + ", ";
-        param_obj += "\"defaultValue\": " + std::to_string(param.defaultValue) + ", ";
-        param_obj += "\"step\": " + std::to_string(param.step) + ", ";
-        param_obj += "\"unit\": \"" + param.unit + "\" ";
-        param_obj += "}";
-        linkParameter(param_obj.c_str(), wasmAudioWorklet);
+        emscripten::val obj = emscripten::val::object();
+        // Set properties
+        obj.set("handle", emscripten::val(i));
+        obj.set("name", emscripten::val(param.name));
+        obj.set("id", emscripten::val(param.jsId));
+        obj.set("minValue", emscripten::val(param.minValue));
+        obj.set("maxValue", emscripten::val(param.maxValue));
+        obj.set("defaultValue", emscripten::val(param.defaultValue));
+        obj.set("step", emscripten::val(param.step));
+        obj.set("unit", emscripten::val(param.unit));
+
+        emscripten::val json = emscripten::val::global("JSON").call<emscripten::val>("stringify", obj);  // Convert to JSON
+        emscripten::val::global("linkParameter").call<void>("call", emscripten::val::global("this"), obj, wasmAudioWorklet);
     }
-	// onAudioProcessorInitialized(wasmAudioWorklet);
 }
 
 // This callback will fire when the Wasm Module has been shared to the
