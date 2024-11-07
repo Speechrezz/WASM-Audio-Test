@@ -10,12 +10,6 @@
 
 inline xynth::AudioProcessor audioProcessor;
 
-struct UserData
-{
-	int test = 5;
-};
-
-UserData userData;
 WebAudioParamDescriptor testParam
 {
 	.defaultValue = 0.f,
@@ -53,8 +47,6 @@ bool ProcessAudio(int numInputs, const AudioSampleFrame *inputs,
 	xynth::AudioBuffer outputBuffer;
     outputBuffer.resize(outputs);
 	audioProcessor.process(outputBuffer, volume);
-
-	//int test = static_cast<UserData*>(userData)->test;
 
 	return true; // Return false here to shut down.
 }
@@ -140,9 +132,10 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
 	// Connect the audio worklet node to the graph.
 	emscripten_audio_node_connect(wasmAudioWorklet, audioContext, 0, 0);
 
-    Synthle m_plugin;
-
 	InitHtmlUi(audioContext);
+
+    Synthle m_plugin;
+    // Initialize the parameters in the GUI
     for (int i = 0; i < m_plugin.m_parameters.size(); i++) {
         auto& param = m_plugin.m_parameters[i];
         emscripten::val obj = emscripten::val::object();
@@ -200,5 +193,5 @@ int main()
 
 	// and kick off Audio Worklet scope initialization, which shares the Wasm
 	// Module and Memory to the AudioWorklet scope and initializes its stack.
-	emscripten_start_wasm_audio_worklet_thread_async(context, wasmAudioWorkletStack, sizeof(wasmAudioWorkletStack), WebAudioWorkletThreadInitialized, &userData);
+	emscripten_start_wasm_audio_worklet_thread_async(context, wasmAudioWorkletStack, sizeof(wasmAudioWorkletStack), WebAudioWorkletThreadInitialized, nullptr);
 }

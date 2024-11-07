@@ -42,8 +42,7 @@
             htmlParam.value = info.defaultValue;
             htmlParam.step = info.step;
 
-            document.querySelector(info.id + "_name").innerHTML = htmlParam.name;
-
+            document.querySelector(info.id + "_name").innerHTML = info.name;
             // This will call into the C++ to update the value.
             htmlParam.oninput = (e) => {
                 document.querySelector(info.id + "_value").innerHTML = e.target.value + info.unit;

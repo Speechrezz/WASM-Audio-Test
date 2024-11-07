@@ -96,10 +96,10 @@ static void PluginProcessEvent(Synthle *plugin, const clap_event_header_t *event
         {
             const clap_event_param_value_t *valueEvent = (const clap_event_param_value_t *)event;
             uint32_t i = (uint32_t)valueEvent->param_id;
-            MutexAcquire(plugin->syncParameters);
+            MutexAcquire(plugin->m_sync_mtx);
             plugin->m_parameters[i].audio_thread.value = valueEvent->value;
             plugin->m_parameters[i].audio_thread.changed = true;
-            MutexRelease(plugin->syncParameters);
+            MutexRelease(plugin->m_sync_mtx);
         }
         if (event->type == CLAP_EVENT_PARAM_MOD)
         {
@@ -162,10 +162,10 @@ static const clap_plugin_params_t extensionParams = {
         // parameters array, since that can only be done on the audio thread. Don't worry -- it'll pick up the changes
         // eventually.
 
-        MutexAcquire(plugin->syncParameters);
+        MutexAcquire(plugin->m_sync_mtx);
         *value = plugin->m_parameters[i].gui_thread.changed ? plugin->m_parameters[i].gui_thread.value
                                                             : plugin->m_parameters[i].audio_thread.value;
-        MutexRelease(plugin->syncParameters);
+        MutexRelease(plugin->m_sync_mtx);
         return true;
     },
 
@@ -316,7 +316,7 @@ static const clap_plugin_t pluginClass = {
         plugin->hostTimerSupport =
             (const clap_host_timer_support_t *)plugin->host->get_extension(plugin->host, CLAP_EXT_TIMER_SUPPORT);
         std::cout << "host timer support? " << plugin->hostTimerSupport << std::endl;
-        MutexInitialise(plugin->syncParameters);
+        MutexInitialise(plugin->m_sync_mtx);
 
         for (uint32_t i = 0; i < plugin->m_parameters.size(); i++)
         {
@@ -339,7 +339,7 @@ static const clap_plugin_t pluginClass = {
         [](const clap_plugin *_plugin) {
             Synthle *plugin = (Synthle *)_plugin->plugin_data;
             plugin->voices.Free();
-            MutexDestroy(plugin->syncParameters);
+            MutexDestroy(plugin->m_sync_mtx);
 
             if (plugin->hostTimerSupport && plugin->hostTimerSupport->register_timer)
             {

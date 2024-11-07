@@ -62,7 +62,7 @@
                 int id = id_str.intValue;
                 float value = param_str.floatValue;
 
-                m_plugin->updateParamMainThread(id, value);
+                m_plugin->updateParamFromMainThread(id, value);
             }
             else if ([action isEqualToString:@"initializeValues"])
             {
