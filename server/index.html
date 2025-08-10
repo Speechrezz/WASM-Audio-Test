@@ -11,6 +11,7 @@
   function onAudioProcessorInitialized(node)
   {
     console.log("Init!");
+    console.log(node);
     console.log(node.parameters.get(0));
     let div = document.createElement('div');
     div.innerHTML = 'Choose frequency: <input style="width: 300px;" type="range" min="20" max="10000" value="440" class="slider" id="pitch"> <span id="pitchValue">440</span><br>' +

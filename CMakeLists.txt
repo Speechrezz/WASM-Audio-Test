@@ -12,6 +12,6 @@ if (DEFINED EMSCRIPTEN)
 
 	set_target_properties(AudioWorklet PROPERTIES LINK_FLAGS "-s WASM_WORKERS=1 -s AUDIO_WORKLET=1 -s WEBAUDIO_DEBUG=1")
 else()
-  #add_executable(AudioWorklet main.cpp)
+	#add_executable(AudioWorklet main.cpp)
 	#add_library(main SHARED main.cpp)
 endif()

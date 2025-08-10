@@ -5,6 +5,7 @@
 #include "AudioProcessor.h"
 
 inline xynth::AudioProcessor audioProcessor;
+inline xynth::AudioBufferWASM audioBufferWASM;
 
 struct UserData
 {
@@ -46,8 +47,9 @@ bool ProcessAudio(int numInputs, const AudioSampleFrame *inputs,
 				  void *userData)
 {
 	const float volume = *params[0].data;
-	xynth::AudioBufferWASM outputBuffer(outputs);
-	audioProcessor.process(outputBuffer, volume);
+	audioBufferWASM = outputs;
+	xynth::AudioView audioView(audioBufferWASM);
+	audioProcessor.process(audioView, volume);
 
 	//int test = static_cast<UserData*>(userData)->test;
 
@@ -84,6 +86,7 @@ void PrepareAudio()
 	};
 
 	audioProcessor.prepare(spec);
+	audioBufferWASM.prepare(spec.numChannels);
 }
 
 EM_JS(void, onAudioProcessorInitialized, (EMSCRIPTEN_AUDIO_WORKLET_NODE_T nodeHandle), {
