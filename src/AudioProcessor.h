@@ -24,7 +24,7 @@ public:
 	}
 
 protected:
-	float* data = nullptr;
+	float* data = nullptr; 
 	int numChannels = 0, numSamples = 0;
 
 };
