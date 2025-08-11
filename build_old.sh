@@ -1,1 +1,0 @@
-emcc -g AudioWorklet.cpp -o AudioWorklet.js -s WASM_WORKERS=1 -s AUDIO_WORKLET=1 -s WEBAUDIO_DEBUG=1
