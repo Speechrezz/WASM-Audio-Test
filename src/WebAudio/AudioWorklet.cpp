@@ -2,10 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "AudioProcessor.h"
+#include "AudioProcessorWeb.h"
 
-inline xynth::AudioProcessor audioProcessor;
-inline xynth::AudioBufferWASM audioBufferWASM;
+inline xynth::AudioProcessorWeb audioProcessor;
 
 struct UserData
 {
@@ -13,26 +12,6 @@ struct UserData
 };
 
 inline UserData userData; // Test
-
-std::vector<WebAudioParamDescriptor> audioParametersToDescriptors(xynth::AudioParameters& parameters)
-{
-	std::vector<WebAudioParamDescriptor> descriptors;
-	descriptors.reserve(parameters.getNumParameters());
-
-	for (const auto& pair : parameters.getFullMap())
-	{
-		const auto& parameter = pair.second;
-
-		descriptors.push_back({
-			.defaultValue = parameter.getDefaultValue(),
-			.minValue = parameter.getMinValue(),
-			.maxValue = parameter.getMaxValue(),
-			.automationRate = WEBAUDIO_PARAM_K_RATE
-		});
-	}
-
-	return descriptors;
-}
 
 /* Steps to use Wasm-based AudioWorklets:
 	1. Create a Web Audio AudioContext either via manual JS code and calling
@@ -53,31 +32,14 @@ std::vector<WebAudioParamDescriptor> audioParametersToDescriptors(xynth::AudioPa
 		begin to fire.
 */
 
-void updateParameters(int numParams, const AudioParamFrame *params, xynth::AudioProcessor& audioProcessor)
-{
-	size_t i = 0;
-	for (auto& pair : audioProcessor.audioParameters.getFullMap())
-	{
-		auto& parameter = pair.second;
-		parameter.setValue(params[i++].data[0]);
-	}
-}
-
 // This function will be called for every fixed-size buffer of audio samples to be processed.
 bool ProcessAudio(int numInputs, const AudioSampleFrame *inputs, 
 				  int numOutputs, AudioSampleFrame *outputs, 
 				  int numParams, const AudioParamFrame *params, 
 				  void *userData)
 {
-	// Update parameters
-	updateParameters(numParams, params, audioProcessor);
-
-	// Create AudioView
-	audioBufferWASM = outputs;
-	xynth::AudioView audioView(audioBufferWASM);
-
-	// Process
-	audioProcessor.process(audioView);
+	audioProcessor.updateParameters(numParams, params);
+	audioProcessor.process(outputs);
 
 	//int test = static_cast<UserData*>(userData)->test;
 
@@ -118,7 +80,6 @@ void PrepareAudio()
 			<< ", maximumBlockSize: " << spec.maxBlockSize << std::endl;
 
 	audioProcessor.prepare(spec);
-	audioBufferWASM.prepare(spec.numChannels);
 }
 
 EM_JS(void, onAudioProcessorInitialized, (EMSCRIPTEN_AUDIO_WORKLET_NODE_T nodeHandle), {
@@ -183,7 +144,7 @@ void WebAudioWorkletThreadInitialized(EMSCRIPTEN_WEBAUDIO_T audioContext, bool s
 	if (!success)
 		return;
 
-	const auto audioParamDescriptors = audioParametersToDescriptors(audioProcessor.audioParameters);
+	const auto audioParamDescriptors = audioProcessor.getAudioParameterDescriptors();
 
 	WebAudioWorkletProcessorCreateOptions opts = {
 		.name = "audio-processor",

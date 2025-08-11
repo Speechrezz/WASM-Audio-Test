@@ -1,6 +1,5 @@
 #pragma once
 
-#include <emscripten/webaudio.h>
 #include "AudioBuffer.h"
 #include "AudioParameter.h"
 #include <iostream>

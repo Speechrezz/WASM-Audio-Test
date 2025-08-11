@@ -35,6 +35,7 @@ public:
     int getNumParameters() const;
 
     std::map<std::string, AudioParameter>& getFullMap() { return parameterMap; }
+    const std::map<std::string, AudioParameter>& getFullMap() const { return parameterMap; }
 
 private:
     std::map<std::string, AudioParameter> parameterMap;

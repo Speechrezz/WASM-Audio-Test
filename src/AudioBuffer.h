@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WebAudio.h"
+#include "WebAudio/WebAudio.h"
 
 namespace xynth
 {
