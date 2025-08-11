@@ -12,14 +12,27 @@ struct UserData
 	int test = 5;
 };
 
-UserData userData;
-WebAudioParamDescriptor testParam
+inline UserData userData; // Test
+
+std::vector<WebAudioParamDescriptor> audioParametersToDescriptors(xynth::AudioParameters& parameters)
 {
-	.defaultValue = 0.f,
-	.minValue = 0.f,
-	.maxValue = 1.f,
-	.automationRate = WEBAUDIO_PARAM_K_RATE
-};
+	std::vector<WebAudioParamDescriptor> descriptors;
+	descriptors.reserve(parameters.getNumParameters());
+
+	for (const auto& pair : parameters.getFullMap())
+	{
+		const auto& parameter = pair.second;
+
+		descriptors.push_back({
+			.defaultValue = parameter.getDefaultValue(),
+			.minValue = parameter.getMinValue(),
+			.maxValue = parameter.getMaxValue(),
+			.automationRate = WEBAUDIO_PARAM_K_RATE
+		});
+	}
+
+	return descriptors;
+}
 
 /* Steps to use Wasm-based AudioWorklets:
 	1. Create a Web Audio AudioContext either via manual JS code and calling
@@ -40,16 +53,31 @@ WebAudioParamDescriptor testParam
 		begin to fire.
 */
 
+void updateParameters(int numParams, const AudioParamFrame *params, xynth::AudioProcessor& audioProcessor)
+{
+	size_t i = 0;
+	for (auto& pair : audioProcessor.audioParameters.getFullMap())
+	{
+		auto& parameter = pair.second;
+		parameter.setValue(params[i++].data[0]);
+	}
+}
+
 // This function will be called for every fixed-size buffer of audio samples to be processed.
 bool ProcessAudio(int numInputs, const AudioSampleFrame *inputs, 
 				  int numOutputs, AudioSampleFrame *outputs, 
 				  int numParams, const AudioParamFrame *params, 
 				  void *userData)
 {
-	const float volume = *params[0].data;
+	// Update parameters
+	updateParameters(numParams, params, audioProcessor);
+
+	// Create AudioView
 	audioBufferWASM = outputs;
 	xynth::AudioView audioView(audioBufferWASM);
-	audioProcessor.process(audioView, volume);
+
+	// Process
+	audioProcessor.process(audioView);
 
 	//int test = static_cast<UserData*>(userData)->test;
 
@@ -151,10 +179,12 @@ void WebAudioWorkletThreadInitialized(EMSCRIPTEN_WEBAUDIO_T audioContext, bool s
 	if (!success)
 		return;
 
+	const auto audioParamDescriptors = audioParametersToDescriptors(audioProcessor.audioParameters);
+
 	WebAudioWorkletProcessorCreateOptions opts = {
 		.name = "audio-processor",
-		.numAudioParams = 1, //audioProcessor.getNumParams(),
-		.audioParamDescriptors = &testParam
+		.numAudioParams = (int)audioParamDescriptors.size(),
+		.audioParamDescriptors = audioParamDescriptors.data()
 	};
 
 	emscripten_create_wasm_audio_worklet_processor_async(audioContext, &opts, AudioWorkletProcessorCreated, userData);

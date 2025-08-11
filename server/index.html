@@ -17,18 +17,23 @@
     div.innerHTML = 'Choose frequency: <input style="width: 300px;" type="range" min="20" max="10000" value="440" class="slider" id="pitch"> <span id="pitchValue">440</span><br>' +
                     'Choose volume: <input style="width: 300px;" type="range" min="0" max="100" value="30" class="slider" id="volume"> <span id="volumeValue">30%</span><br>';
     document.body.appendChild(div);
-    document.querySelector('#pitch').oninput = (e) => {
+
+    // Pitch slider
+    const pitchSlider = document.querySelector('#pitch');
+    pitchSlider.oninput = (e) => {
       document.querySelector('#pitchValue').innerHTML = parseInt(e.target.value);
+      node.parameters.get(0).value = parseFloat(e.target.value);
     };
 
-    // Volume Slider
+    // Volume slider
     const volumeSlider = document.querySelector('#volume');
     volumeSlider.oninput = (e) => {
       document.querySelector('#volumeValue').innerHTML = parseInt(e.target.value) + '%';
-      node.parameters.get(0).value = parseFloat(e.target.value) / 100;
+      node.parameters.get(1).value = parseFloat(e.target.value) / 100;
     };
 
-    node.parameters.get(0).value = parseFloat(volumeSlider.value) / 100;
+    node.parameters.get(0).value = parseFloat(pitchSlider.value);
+    node.parameters.get(1).value = parseFloat(volumeSlider.value) / 100;
   }
 </script>
 <body id="body">

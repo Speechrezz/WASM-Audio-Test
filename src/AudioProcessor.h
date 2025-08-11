@@ -2,35 +2,40 @@
 
 #include <emscripten/webaudio.h>
 #include "AudioBuffer.h"
+#include "AudioParameter.h"
 #include <iostream>
 #include <stdlib.h>
+#include <cmath>
 
 namespace xynth
 {
 
+class SineOscillator
+{
+public:
+	SineOscillator() = default;
+
+	void prepare(const ProcessSpec& spec);
+	void process(AudioView& audioView, float frequency, float volume);
+
+protected:
+	float radiansCoefficient = 0.f;
+	float phase = 0.f;
+
+};
+
 class AudioProcessor
 {
 public:
-	AudioProcessor() = default;
+	AudioProcessor();
 
-	int getNumParams() const { return 1; }
+	void prepare(const ProcessSpec& spec);
+	void process(AudioView& audioView);
 
-	void prepare(const ProcessSpec& spec)
-	{
+	AudioParameters audioParameters;
 
-	}
-
-	void process(AudioView& audioView, float volume)
-	{
-		for (int channel = 0; channel < audioView.getNumChannels(); ++channel)
-		{
-			auto* output = audioView.getChannelPointer(channel);
-			for (int i = 0; i < audioView.getNumSamples(); ++i)
-			{
-				output[i] = (rand() / (float)RAND_MAX * 2.0f - 1.0f) * volume; //0.1f;
-			}
-		}
-	}
+protected:
+	SineOscillator oscillator;
 
 };
 

@@ -5,8 +5,10 @@ project(test)
 add_definitions(-std=c++17)
 set (CMAKE_CXX_STANDARD 17)
 
+file(GLOB_RECURSE MY_SOURCES src/**)
+
 if (DEFINED EMSCRIPTEN)
-	add_executable(AudioWorklet src/AudioWorklet.cpp)
+	add_executable(AudioWorklet ${MY_SOURCES})
 
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 

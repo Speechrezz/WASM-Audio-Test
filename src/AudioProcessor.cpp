@@ -1,0 +1,55 @@
+#include "AudioProcessor.h"
+
+namespace xynth
+{
+
+// ---SineOscillator---
+
+void SineOscillator::prepare(const ProcessSpec& spec)
+{
+    phase = 0.f;
+    radiansCoefficient = 2.f * M_PI / float(spec.sampleRate);
+}
+
+void SineOscillator::process(AudioView& audioView, float frequency, float volume)
+{
+    const float phaseOffset = frequency * radiansCoefficient;
+    float currentPhase = phase;
+
+    for (int ch = 0; ch < audioView.getNumChannels(); ++ch)
+    {
+        currentPhase = phase;
+        auto* channel = audioView.getChannelPointer(ch);
+
+        for (int i = 0; i < audioView.getNumSamples(); ++i)
+        {
+            channel[i] = std::sin(currentPhase) * volume;
+            currentPhase += phaseOffset;
+        }
+    }
+
+    phase = std::fmod(currentPhase, 2.f * M_PI);
+}
+
+
+// ---AudioProcessor---
+
+AudioProcessor::AudioProcessor()
+{
+    audioParameters.add("frequency", { 20.f, 10000.f, 440.f });
+    audioParameters.add("volume", { 0.f, 1.f, 0.2f });
+}
+
+void AudioProcessor::prepare(const ProcessSpec& spec)
+{
+    oscillator.prepare(spec);
+}
+
+void AudioProcessor::process(AudioView& audioView)
+{
+    const float frequency = audioParameters.get("frequency").getValue();
+    const float volume = audioParameters.get("volume").getValue();
+    oscillator.process(audioView, frequency, volume);
+}
+
+}
