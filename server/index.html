@@ -12,7 +12,7 @@
     const parameter = parameters.get(Module.parameterIdToIndex(id));
     const parameterView = Module.getParameter(id);
 
-    console.log("createSlider:", id, ", index:", Module.parameterIdToIndex(id));
+    console.log(`createSlider() - id: ${id}, index: ${Module.parameterIdToIndex(id)}`);
     console.log(parameter);
 
     const div = document.createElement('div');

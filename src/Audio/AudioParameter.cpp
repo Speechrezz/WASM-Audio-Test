@@ -93,9 +93,9 @@ AudioParameter* AudioParameter::createFrequency(const std::string& parameterID,
 
 // ---Parameters---
 
-void AudioParameters::add(const std::string& id, AudioParameter* p)
+void AudioParameters::add(AudioParameter* p)
 {
-    parameterMap.emplace(id, p);
+    parameterMap.emplace(p->getId(), p);
 }
 
 AudioParameter& AudioParameters::get(const std::string& id)

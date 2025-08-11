@@ -60,7 +60,7 @@ class AudioParameters
 public:
     using ParameterMap = std::map<std::string, std::unique_ptr<AudioParameter>>;
 
-    void add(const std::string& id, AudioParameter*);
+    void add(AudioParameter*);
     AudioParameter& get(const std::string& id);
 
     int getNumParameters() const;
