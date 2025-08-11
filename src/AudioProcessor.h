@@ -1,7 +1,7 @@
 #pragma once
 
-#include "AudioBuffer.h"
-#include "AudioParameter.h"
+#include "Audio/AudioBuffer.h"
+#include "Audio/AudioParameter.h"
 #include <iostream>
 #include <stdlib.h>
 #include <cmath>

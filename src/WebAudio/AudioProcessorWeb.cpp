@@ -21,8 +21,8 @@ void AudioProcessorWeb::updateParameters(int numParams, const AudioParamFrame *p
     size_t i = 0;
 	for (auto& pair : processor.audioParameters.getFullMap())
 	{
-		auto& parameter = pair.second;
-		parameter.setValue(params[i++].data[0]);
+		auto& parameter = *pair.second;
+		parameter.setNormalizedValue(params[i++].data[0]);
 	}
 }
 
@@ -34,12 +34,12 @@ std::vector<WebAudioParamDescriptor> AudioProcessorWeb::getAudioParameterDescrip
 
 	for (const auto& pair : parameters.getFullMap())
 	{
-		const auto& parameter = pair.second;
+		const auto& parameter = *pair.second;
 
 		descriptors.push_back({
-			.defaultValue = parameter.getDefaultValue(),
-			.minValue = parameter.getMinValue(),
-			.maxValue = parameter.getMaxValue(),
+			.defaultValue = parameter.convertToNormalizedValue(parameter.getDefaultValue()),
+			.minValue = 0.f,
+			.maxValue = 1.f,
 			.automationRate = WEBAUDIO_PARAM_K_RATE
 		});
 	}

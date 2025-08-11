@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AudioProcessor.h"
-#include "AudioBuffer.h"
+#include "Audio/AudioBuffer.h"
 #include "WebAudio.h"
 
 namespace xynth
