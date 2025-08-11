@@ -7,33 +7,48 @@
   <script src="audioworklet.js"></script>
 </head>
 <script>
-  console.log("Hello!");
+  function createSlider(parameter, name)
+  {
+    console.log("createSlider:", name)
+    console.log(parameter)
+
+    const div = document.createElement('div');
+    const label = document.createElement("span");
+    label.innerText = "Choose " + name + ": ";
+    div.appendChild(label);
+
+    const slider = document.createElement("input");
+    slider.id = name;
+    slider.type = "range";
+    slider.step = "any"
+    slider.min = `${parameter.minValue}`;
+    slider.max = `${parameter.maxValue}`;
+    slider.value = `${parameter.defaultValue}`;
+    slider.style = "width: 300px;";
+    div.appendChild(slider);
+
+    const valueLabel = document.createElement("span");
+    valueLabel.id = name + "Value";
+    div.appendChild(valueLabel);
+
+    function onChange() {
+      valueLabel.innerText = parseFloat(slider.value).toFixed(2);
+      parameter.value = parseFloat(slider.value);
+    }
+
+    slider.oninput = (e) => { onChange(); };
+    onChange();
+
+    return div;
+  }
+
   function onAudioProcessorInitialized(node)
   {
     console.log("Init!");
     console.log(node);
     console.log(node.parameters.get(0));
-    let div = document.createElement('div');
-    div.innerHTML = 'Choose frequency: <input style="width: 300px;" type="range" min="20" max="10000" value="440" class="slider" id="pitch"> <span id="pitchValue">440</span><br>' +
-                    'Choose volume: <input style="width: 300px;" type="range" min="0" max="100" value="30" class="slider" id="volume"> <span id="volumeValue">30%</span><br>';
-    document.body.appendChild(div);
-
-    // Pitch slider
-    const pitchSlider = document.querySelector('#pitch');
-    pitchSlider.oninput = (e) => {
-      document.querySelector('#pitchValue').innerHTML = parseInt(e.target.value);
-      node.parameters.get(0).value = parseFloat(e.target.value);
-    };
-
-    // Volume slider
-    const volumeSlider = document.querySelector('#volume');
-    volumeSlider.oninput = (e) => {
-      document.querySelector('#volumeValue').innerHTML = parseInt(e.target.value) + '%';
-      node.parameters.get(1).value = parseFloat(e.target.value) / 100;
-    };
-
-    node.parameters.get(0).value = parseFloat(pitchSlider.value);
-    node.parameters.get(1).value = parseFloat(volumeSlider.value) / 100;
+    document.body.appendChild(createSlider(node.parameters.get(0), "frequency"))
+    document.body.appendChild(createSlider(node.parameters.get(1), "volume"))
   }
 </script>
 <body id="body">
