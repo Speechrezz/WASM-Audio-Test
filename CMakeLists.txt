@@ -1,19 +1,23 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.16)
+project(test LANGUAGES CXX)
 
-project(test)
+# Prefer this over add_definitions(-std=c++17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_definitions(-std=c++17)
-set (CMAKE_CXX_STANDARD 17)
+file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS src/*.[ch]pp src/*.c src/*.h)
 
-file(GLOB_RECURSE MY_SOURCES src/**)
+add_executable(AudioWorklet ${MY_SOURCES})
 
-if (DEFINED EMSCRIPTEN)
-	add_executable(AudioWorklet ${MY_SOURCES})
+# <-- This is the key line
+target_include_directories(AudioWorklet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-	set(CMAKE_EXECUTABLE_SUFFIX ".js")
-
-	set_target_properties(AudioWorklet PROPERTIES LINK_FLAGS "-s WASM_WORKERS=1 -s AUDIO_WORKLET=1 -s WEBAUDIO_DEBUG=1")
-else()
-	#add_executable(AudioWorklet main.cpp)
-	#add_library(main SHARED main.cpp)
+# Emscripten-specific options (more idiomatic checks & APIs)
+if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+  set_target_properties(AudioWorklet PROPERTIES SUFFIX ".js")
+  target_link_options(AudioWorklet PRIVATE
+    "-sWASM_WORKERS=1"
+    "-sAUDIO_WORKLET=1"
+    "-sWEBAUDIO_DEBUG=1"
+  )
 endif()
