@@ -113,6 +113,10 @@ void PrepareAudio()
 		.maxBlockSize = getMaximumBlockSize()
 	};
 
+	std::cout << "Browser Sample Rate: " << spec.sampleRate
+			<< ", numChannels: " << spec.numChannels
+			<< ", maximumBlockSize: " << spec.maxBlockSize << std::endl;
+
 	audioProcessor.prepare(spec);
 	audioBufferWASM.prepare(spec.numChannels);
 }
@@ -202,10 +206,6 @@ int main()
 	srand(time(NULL));
 
 	assert(!emscripten_current_thread_is_audio_worklet());
-
-	std::cout << "Browser Sample Rate: " << getSampleRate() 
-			  << ", numChannels: " << getNumberOfChannels()
-			  << ", maximumBlockSize: " << getMaximumBlockSize() << std::endl;
 
 	// Create an audio context
 	EMSCRIPTEN_WEBAUDIO_T context = emscripten_create_audio_context(0 /* use default constructor options */);

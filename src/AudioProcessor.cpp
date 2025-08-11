@@ -36,7 +36,7 @@ void SineOscillator::process(AudioView& audioView, float frequency, float volume
 
 AudioProcessor::AudioProcessor()
 {
-    audioParameters.add("frequency", { 20.f, 10000.f, 440.f });
+    audioParameters.add("frequency", { 20.f, 2000.f, 220.f });
     audioParameters.add("volume", { 0.f, 1.f, 0.2f });
 }
 
