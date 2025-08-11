@@ -7,18 +7,21 @@
   <script src="audioworklet.js"></script>
 </head>
 <script>
-  function createSlider(parameter, name)
+  function createSlider(parameters, id)
   {
-    console.log("createSlider:", name)
-    console.log(parameter)
+    const parameter = parameters.get(Module.parameterIdToIndex(id));
+    const parameterView = Module.getParameter(id);
+
+    console.log("createSlider:", id, ", index:", Module.parameterIdToIndex(id));
+    console.log(parameter);
 
     const div = document.createElement('div');
     const label = document.createElement("span");
-    label.innerText = "Choose " + name + ": ";
+    label.innerText = "Choose " + id + ": ";
     div.appendChild(label);
 
     const slider = document.createElement("input");
-    slider.id = name;
+    slider.id = id;
     slider.type = "range";
     slider.step = "any"
     slider.min = `${parameter.minValue}`;
@@ -28,12 +31,13 @@
     div.appendChild(slider);
 
     const valueLabel = document.createElement("span");
-    valueLabel.id = name + "Value";
+    valueLabel.id = id + "Value";
     div.appendChild(valueLabel);
 
     function onChange() {
-      valueLabel.innerText = parseFloat(slider.value).toFixed(2);
-      parameter.value = parseFloat(slider.value);
+      const sliderValue = parseFloat(slider.value);
+      valueLabel.innerText = parameterView.convertFromNormalizedValue(sliderValue).toFixed(2);
+      parameter.value = sliderValue;
     }
 
     slider.oninput = (e) => { onChange(); };
@@ -46,9 +50,8 @@
   {
     console.log("Init!");
     console.log(node);
-    console.log(node.parameters.get(0));
-    document.body.appendChild(createSlider(node.parameters.get(0), "frequency"))
-    document.body.appendChild(createSlider(node.parameters.get(1), "volume"))
+    document.body.appendChild(createSlider(node.parameters, "frequency"))
+    document.body.appendChild(createSlider(node.parameters, "volume"))
   }
 </script>
 <body id="body">

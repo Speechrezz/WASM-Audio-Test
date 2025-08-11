@@ -3,6 +3,24 @@
 namespace xynth
 {
 
+// ---AudioParameterView---
+
+AudioParameterView::AudioParameterView(const AudioParameter& p) : parameter(p)
+{}
+
+float AudioParameterView::convertToNormalizedValue(float value) const
+{
+	return parameter.convertToNormalizedValue(value);
+}
+
+float AudioParameterView::convertFromNormalizedValue(float normalizedValue) const
+{
+	return parameter.convertFromNormalizedValue(normalizedValue);
+}
+
+
+// ---AudioProcessorWeb---
+
 void AudioProcessorWeb::prepare(const ProcessSpec& spec)
 {
     processor.prepare(spec);
@@ -26,11 +44,13 @@ void AudioProcessorWeb::updateParameters(int numParams, const AudioParamFrame *p
 	}
 }
 
-std::vector<WebAudioParamDescriptor> AudioProcessorWeb::getAudioParameterDescriptors() const
+std::vector<WebAudioParamDescriptor> AudioProcessorWeb::getAudioParameterDescriptors()
 {
     const auto& parameters = processor.audioParameters;
     std::vector<WebAudioParamDescriptor> descriptors;
 	descriptors.reserve(parameters.getNumParameters());
+
+	indexToParameterId.reserve(parameters.getNumParameters());
 
 	for (const auto& pair : parameters.getFullMap())
 	{
@@ -42,6 +62,10 @@ std::vector<WebAudioParamDescriptor> AudioProcessorWeb::getAudioParameterDescrip
 			.maxValue = 1.f,
 			.automationRate = WEBAUDIO_PARAM_K_RATE
 		});
+
+		// Generate mappings
+		parameterIdToIndex.insert({ parameter.getId(), (int)indexToParameterId.size() });
+		indexToParameterId.push_back(parameter.getId());
 	}
 
 	return descriptors;

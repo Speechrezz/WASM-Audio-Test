@@ -1,3 +1,4 @@
+#include <emscripten/bind.h>
 #include <emscripten/webaudio.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +6,27 @@
 #include "AudioProcessorWeb.h"
 
 inline xynth::AudioProcessorWeb audioProcessor;
+
+int parameterIdToIndex(const std::string& id)
+{
+	return audioProcessor.parameterIdToIndex[id];
+}
+
+xynth::AudioParameterView getParameter(const std::string& id)
+{
+	return { audioProcessor.getProcessor().audioParameters.get(id) };
+}
+
+EMSCRIPTEN_BINDINGS(my_module) {
+	emscripten::class_<xynth::AudioParameterView>("AudioParameterView")
+		.function("getName", &xynth::AudioParameterView::getName)
+		.function("getId", &xynth::AudioParameterView::getId)
+		.function("convertToNormalizedValue", &xynth::AudioParameterView::convertToNormalizedValue)
+		.function("convertFromNormalizedValue", &xynth::AudioParameterView::convertFromNormalizedValue);
+
+    emscripten::function("parameterIdToIndex", &parameterIdToIndex);
+    emscripten::function("getParameter", &getParameter);
+}
 
 struct UserData
 {

@@ -13,7 +13,8 @@ AudioParameter::AudioParameter(const std::string& parameterID,
                                float minValue, 
                                float maxValue, 
                                float defaultValue)
-    : minValue(minValue), maxValue(maxValue), defaultValue(defaultValue), value(defaultValue)
+    : minValue(minValue), maxValue(maxValue), defaultValue(defaultValue), value(defaultValue),
+      id(parameterID), name(name)
 {
     stringFromValueFunction = [](float value, int) { return std::to_string(value); };
     valueFromStringFunction = [](const std::string& text) { return std::atof(text.c_str()); };
