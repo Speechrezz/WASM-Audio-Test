@@ -1,5 +1,6 @@
 #include "AudioProcessor.h"
 #include "Audio/AudioMath.h"
+#include "Text/ParameterText.h"
 
 namespace xynth
 {
@@ -38,7 +39,10 @@ void SineOscillator::process(AudioView& audioView, float frequency, float volume
 AudioProcessor::AudioProcessor()
 {
     audioParameters.add(AudioParameter::createFrequency("frequency", "Frequency", 20.f, 2000.f, 220.f ));
-    audioParameters.add(new AudioParameter{ "volume", "Volume", -60.f, 0.f, -20.f });
+    
+    auto* volumeParameter = new AudioParameter{ "volume", "Volume", -60.f, 0.f, -20.f };
+    volumeParameter->valueToStringMapping = [](float value, int) { return floatToString(value, 2) + " dB"; };
+    audioParameters.add(volumeParameter);
 }
 
 void AudioProcessor::prepare(const ProcessSpec& spec)

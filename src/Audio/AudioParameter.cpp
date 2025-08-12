@@ -1,6 +1,6 @@
 #include "AudioParameter.h"
 #include "AudioMath.h"
-#include <cstdlib>
+#include "Text/ParameterText.h"
 #include <algorithm>
 
 namespace xynth
@@ -16,8 +16,8 @@ AudioParameter::AudioParameter(const std::string& parameterID,
     : minValue(minValue), maxValue(maxValue), defaultValue(defaultValue), value(defaultValue),
       id(parameterID), name(name)
 {
-    stringFromValueFunction = [](float value, int) { return std::to_string(value); };
-    valueFromStringFunction = [](const std::string& text) { return std::atof(text.c_str()); };
+    valueToStringMapping = [](float value, int) { return floatToString(value, 2); };
+    valueFromStringMapping = [](const std::string& text) { return textToValue(text); };
 }
 
 float AudioParameter::getValue() const
@@ -62,12 +62,12 @@ float AudioParameter::convertFromNormalizedValue(float normalizedValue) const
 
 std::string AudioParameter::getValueToString(float value, int maximumStringLength) const
 {
-    return stringFromValueFunction(value, maximumStringLength);
+    return valueToStringMapping(value, maximumStringLength);
 }
 
 float AudioParameter::getValueFromString(const std::string& text) const
 {
-    return valueFromStringFunction(text);
+    return valueFromStringMapping(text);
 }
 
 AudioParameter* AudioParameter::createFrequency(const std::string& parameterID,
@@ -85,6 +85,10 @@ AudioParameter* AudioParameter::createFrequency(const std::string& parameterID,
     parameter->fromNormalizedMapping = [](float minValue, float maxValue, float normalizedValue)
     {
         return mapToLog10(normalizedValue, minValue, maxValue);
+    };
+    parameter->valueToStringMapping = [](float value, int)
+    {
+        return frequencyAsText(value);
     };
 
     return parameter;

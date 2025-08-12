@@ -32,11 +32,11 @@ public:
     float convertToNormalizedValue(float value) const;
     float convertFromNormalizedValue(float normalizedValue) const;
 
-    std::string getValueToString(float value, int maximumStringLength = 0) const;
+    std::string getValueToString(float value, int maximumStringLength = 2) const;
     float getValueFromString(const std::string& text) const;
 
-    std::function<std::string(float, int)> stringFromValueFunction;
-    std::function<float(const std::string&)> valueFromStringFunction;
+    std::function<std::string(float, int)> valueToStringMapping;
+    std::function<float(const std::string&)> valueFromStringMapping;
 
     std::function<float(float minValue, float maxValue, float value)> toNormalizedMapping;
     std::function<float(float minValue, float maxValue, float normalizedValue)> fromNormalizedMapping;

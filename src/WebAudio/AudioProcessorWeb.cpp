@@ -18,6 +18,16 @@ float AudioParameterView::convertFromNormalizedValue(float normalizedValue) cons
 	return parameter.convertFromNormalizedValue(normalizedValue);
 }
 
+std::string AudioParameterView::getValueToString(float value, int maximumStringLength) const
+{
+	return parameter.getValueToString(value, maximumStringLength);
+}
+
+float AudioParameterView::getValueFromString(const std::string& text) const
+{
+	return parameter.getValueFromString(text);
+}
+
 
 // ---AudioProcessorWeb---
 

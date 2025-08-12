@@ -21,6 +21,9 @@ public:
     float convertToNormalizedValue(float value) const;
     float convertFromNormalizedValue(float normalizedValue) const;
 
+    std::string getValueToString(float value, int maximumStringLength = 2) const;
+    float getValueFromString(const std::string& text) const;
+
 protected:
     const AudioParameter& parameter;
 

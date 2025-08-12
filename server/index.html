@@ -35,9 +35,10 @@
     div.appendChild(valueLabel);
 
     function onChange() {
-      const sliderValue = parseFloat(slider.value);
-      valueLabel.innerText = parameterView.convertFromNormalizedValue(sliderValue).toFixed(2);
-      parameter.value = sliderValue;
+      const normalizedValue = parseFloat(slider.value);
+      const value = parameterView.convertFromNormalizedValue(normalizedValue);
+      valueLabel.innerText = parameterView.getValueToString(value, 2);
+      parameter.value = normalizedValue;
     }
 
     slider.oninput = (e) => { onChange(); };

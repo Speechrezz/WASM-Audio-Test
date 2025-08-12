@@ -22,7 +22,9 @@ EMSCRIPTEN_BINDINGS(my_module) {
 		.function("getName", &xynth::AudioParameterView::getName)
 		.function("getId", &xynth::AudioParameterView::getId)
 		.function("convertToNormalizedValue", &xynth::AudioParameterView::convertToNormalizedValue)
-		.function("convertFromNormalizedValue", &xynth::AudioParameterView::convertFromNormalizedValue);
+		.function("convertFromNormalizedValue", &xynth::AudioParameterView::convertFromNormalizedValue)
+		.function("getValueToString", &xynth::AudioParameterView::getValueToString)
+		.function("getValueFromString", &xynth::AudioParameterView::getValueFromString);
 
     emscripten::function("parameterIdToIndex", &parameterIdToIndex);
     emscripten::function("getParameter", &getParameter);
