@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
   <script src="audioworklet.js"></script>
+  <script src="midi.js"></script>
 </head>
 <script>
   function createSlider(parameters, id)
@@ -53,6 +54,8 @@
     console.log(node);
     document.body.appendChild(createSlider(node.parameters, "frequency"))
     document.body.appendChild(createSlider(node.parameters, "volume"))
+
+    getMIDIAccess();
   }
 </script>
 <body id="body">
