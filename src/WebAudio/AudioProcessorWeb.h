@@ -1,10 +1,11 @@
 #pragma once
 
-#include "AudioProcessor.h"
-#include "Audio/AudioBuffer.h"
-#include "WebAudio.h"
 #include <map>
 #include <string>
+#include "WebMidi.h"
+#include "WebAudio.h"
+#include "AudioProcessor.h"
+#include "Audio/AudioBuffer.h"
 
 namespace xynth
 {
@@ -33,6 +34,8 @@ protected:
 class AudioProcessorWeb
 {
 public:
+    AudioProcessorWeb();
+
     void prepare(const ProcessSpec&);
     void process(AudioSampleFrame *outputs);
 
@@ -44,6 +47,7 @@ public:
 public:
     std::map<std::string, int> parameterIdToIndex;
     std::vector<std::string> indexToParameterId;
+    WebMidi webMidi;
 
 protected:
     AudioProcessor processor;

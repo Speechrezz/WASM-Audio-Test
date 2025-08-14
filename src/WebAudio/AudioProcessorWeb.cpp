@@ -1,4 +1,5 @@
 #include "AudioProcessorWeb.h"
+#include "Midi/MidiView.h"
 
 namespace xynth
 {
@@ -31,6 +32,9 @@ float AudioParameterView::getValueFromString(const std::string& text) const
 
 // ---AudioProcessorWeb---
 
+AudioProcessorWeb::AudioProcessorWeb()
+{}
+
 void AudioProcessorWeb::prepare(const ProcessSpec& spec)
 {
     processor.prepare(spec);
@@ -41,7 +45,10 @@ void AudioProcessorWeb::process(AudioSampleFrame *outputs)
 {
 	audioBufferWASM = outputs;
 	AudioView audioView(audioBufferWASM);
-    processor.process(audioView);
+
+	MidiView midiView(webMidi);
+
+    processor.process(audioView, midiView);
 }
 
 void AudioProcessorWeb::updateParameters(int numParams, const AudioParamFrame *params)

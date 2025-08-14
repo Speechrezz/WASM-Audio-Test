@@ -56,8 +56,9 @@
   {
     console.log("Init!");
     console.log(node);
-    document.body.appendChild(createSlider(node.parameters, "frequency"))
-    document.body.appendChild(createSlider(node.parameters, "volume"))
+    console.log(Module);
+    document.body.appendChild(createSlider(node.parameters, "frequency"));
+    document.body.appendChild(createSlider(node.parameters, "volume"));
 
     initializeMIDI();
   }

@@ -17,6 +17,11 @@ xynth::AudioParameterView getParameter(const std::string& id)
 	return { audioProcessor.getProcessor().audioParameters.get(id) };
 }
 
+void pushMidiEvent(uint32_t newEvent)
+{
+	audioProcessor.webMidi.pushEvent(newEvent);
+}
+
 EMSCRIPTEN_BINDINGS(my_module) {
 	emscripten::class_<xynth::AudioParameterView>("AudioParameterView")
 		.function("getName", &xynth::AudioParameterView::getName)
@@ -28,6 +33,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
 
     emscripten::function("parameterIdToIndex", &parameterIdToIndex);
     emscripten::function("getParameter", &getParameter);
+    emscripten::function("pushMidiEvent", &pushMidiEvent);
 }
 
 struct UserData

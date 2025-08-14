@@ -13,6 +13,7 @@ target_include_directories(AudioWorklet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten") 
   # Emscripten specific compiler settings
   set_target_properties(AudioWorklet PROPERTIES SUFFIX ".js")
+  target_compile_options(AudioWorklet PRIVATE "-sWASM_WORKERS=1")
   target_link_options(AudioWorklet PRIVATE "-sWASM_WORKERS=1" "-sAUDIO_WORKLET=1" "-sWEBAUDIO_DEBUG=1" "--bind")
 else()
   # TODO: Desktop plugin/standalone target support

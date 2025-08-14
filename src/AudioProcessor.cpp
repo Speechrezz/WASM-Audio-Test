@@ -50,10 +50,21 @@ void AudioProcessor::prepare(const ProcessSpec& spec)
     oscillator.prepare(spec);
 }
 
-void AudioProcessor::process(AudioView& audioView)
+void AudioProcessor::process(AudioView& audioView, MidiView& midiView)
 {
-    const float frequency = audioParameters.get("frequency").getValue();
+    //const float frequency = audioParameters.get("frequency").getValue();
     const float volume = fromDecibels(audioParameters.get("volume").getValue());
+
+    while (midiView.hasNext())
+    {
+        const auto midiEvent = midiView.getNextEvent();
+        if (midiEvent.isNoteOn())
+        {
+            const int noteNumber = midiEvent.getNoteNumber();
+            frequency = noteNumberToFrequency(noteNumber);
+        }
+    }
+
     oscillator.process(audioView, frequency, volume);
 }
 

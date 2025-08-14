@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Audio/AudioBuffer.h"
-#include "Audio/AudioParameter.h"
 #include <iostream>
 #include <stdlib.h>
 #include <cmath>
+#include "Audio/AudioBuffer.h"
+#include "Audio/AudioParameter.h"
+#include "Midi/MidiView.h"
 
 namespace xynth
 {
@@ -29,11 +30,12 @@ public:
 	AudioProcessor();
 
 	void prepare(const ProcessSpec& spec);
-	void process(AudioView& audioView);
+	void process(AudioView& audioView, MidiView& midiView);
 
 	AudioParameters audioParameters;
 
 protected:
+	float frequency = 220.f;
 	SineOscillator oscillator;
 
 };

@@ -1,11 +1,16 @@
-import { MidiBuffer } from "./midi_buffer.js";
+import { packMidiEvent } from "./midi_buffer.js";
 
 let midi = null; // global MIDIAccess object
-let midiBuffer = new MidiBuffer(1024);
 
-function onMIDISuccess(midiAccess) {
+export function initializeMIDI(successCallback = undefined) {
+  navigator.requestMIDIAccess().then((midiAccess) => onMIDISuccess(midiAccess, successCallback), onMIDIFailure);
+}
+
+function onMIDISuccess(midiAccess, successCallback) {
   console.log("MIDI ready!");
   midi = midiAccess; // store in the global (in real usage, would probably keep in an object instance)
+  if (successCallback)
+    successCallback();
   startLoggingMIDIInput(midi);
 }
 
@@ -13,12 +18,15 @@ function onMIDIFailure(msg) {
   console.error(`Failed to get MIDI access - ${msg}`);
 }
 
-export function initializeMIDI() {
-  navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+function startLoggingMIDIInput(midiAccess) {
+  midiAccess.inputs.forEach((entry) => {
+    entry.onmidimessage = onMIDIMessage;
+  });
 }
 
-export function getMidiBuffer() {
-  return midiBuffer;
+function onMIDIMessage(e) {
+  Module.pushMidiEvent(packMidiEvent(e.data[0], e.data[1], e.data[2]));
+  prettyLog(e);
 }
 
 function prettyLog(e) {
@@ -39,15 +47,4 @@ function prettyLog(e) {
   } else {
     console.log(`Raw     ch ${ch}  [${Array.from(e.data)}]       (${timeStamp})`);
   }
-}
-
-function onMIDIMessage(e) {
-  midiBuffer.push(e.data[0], e.data[1], e.data[2]);
-  prettyLog(e);
-}
-
-function startLoggingMIDIInput(midiAccess) {
-  midiAccess.inputs.forEach((entry) => {
-    entry.onmidimessage = onMIDIMessage;
-  });
 }
