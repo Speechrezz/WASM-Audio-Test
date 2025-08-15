@@ -27,7 +27,7 @@ public:
 
 	float* getChannelPointer(int channelIndex)
 	{
-		return channels[channelIndex];
+		return channels[channelIndex] + startSample;
 	}
 
 protected:
