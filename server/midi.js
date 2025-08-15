@@ -1,16 +1,29 @@
-import { packMidiEvent } from "./midi_buffer.js";
-
+/**
+ * @global
+ * @type {MIDIAccess | null}
+ */
 let midi = null; // global MIDIAccess object
 
-export function initializeMIDI(successCallback = undefined) {
-  navigator.requestMIDIAccess().then((midiAccess) => onMIDISuccess(midiAccess, successCallback), onMIDIFailure);
+/**
+ * @global
+ * @type {AudioWorkletNode | null}
+ */
+let audioWorkletNode = null;
+
+/**
+ * @param {AudioWorkletNode} workletNode 
+ */
+export function initializeMIDI(workletNode) {
+  audioWorkletNode = workletNode;
+  navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
 }
 
-function onMIDISuccess(midiAccess, successCallback) {
+/**
+ * @param {MIDIAccess} midiAccess 
+ */
+function onMIDISuccess(midiAccess) {
   console.log("MIDI ready!");
   midi = midiAccess; // store in the global (in real usage, would probably keep in an object instance)
-  if (successCallback)
-    successCallback();
   startLoggingMIDIInput(midi);
 }
 
@@ -18,17 +31,42 @@ function onMIDIFailure(msg) {
   console.error(`Failed to get MIDI access - ${msg}`);
 }
 
+/**
+ * @param {MIDIAccess} midiAccess 
+ */
 function startLoggingMIDIInput(midiAccess) {
   midiAccess.inputs.forEach((entry) => {
     entry.onmidimessage = onMIDIMessage;
   });
 }
 
+/**
+ * @param {MIDIMessageEvent} e 
+ */
 function onMIDIMessage(e) {
-  Module.pushMidiEvent(packMidiEvent(e.data[0], e.data[1], e.data[2]));
+  if (audioWorkletNode.context.state === "running") {
+    const adjustedTimeStamp = midiTimestampToContextFrame(e.timeStamp);
+    Module.pushMidiEvent(packMidiEvent(e.data[0], e.data[1], e.data[2]), adjustedTimeStamp);
+  }
+
   prettyLog(e);
 }
 
+/**
+ * @param {number} timeStampMs 
+ */
+function midiTimestampToContextFrame(timeStampMs) {
+  const audioContext = audioWorkletNode.context;
+
+  const { performanceTime, contextTime } = audioContext.getOutputTimestamp();
+  const eventCtxTimeSec = contextTime + (timeStampMs - performanceTime) * 1e-3;
+
+  return Math.max(0, Math.floor(eventCtxTimeSec * audioContext.sampleRate));
+}
+
+/**
+ * @param {MIDIMessageEvent} e 
+ */
 function prettyLog(e) {
   const [status, data1, data2] = e.data;
   const cmd = status >> 4;
@@ -47,4 +85,15 @@ function prettyLog(e) {
   } else {
     console.log(`Raw     ch ${ch}  [${Array.from(e.data)}]       (${timeStamp})`);
   }
+}
+
+// layout per event: [status, data1, data2, frameOffset]
+
+function packMidiEvent(status, d1, d2, frameOffset) {
+  const packed =
+    ((frameOffset & 0xff) << 24) |
+    ((d2 & 0xff) << 16) |
+    ((d1 & 0xff) << 8)  |
+    (status & 0xff);
+  return packed;
 }

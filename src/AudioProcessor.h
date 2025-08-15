@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <cmath>
 #include "Audio/AudioBuffer.h"
+#include "Audio/AudioCore.h"
 #include "Audio/AudioParameter.h"
 #include "Midi/MidiView.h"
 

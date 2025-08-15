@@ -48,6 +48,7 @@ public:
     std::map<std::string, int> parameterIdToIndex;
     std::vector<std::string> indexToParameterId;
     WebMidi webMidi;
+    WebAudioContext audioContext;
 
 protected:
     AudioProcessor processor;

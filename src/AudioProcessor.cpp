@@ -55,9 +55,9 @@ void AudioProcessor::process(AudioView& audioView, MidiView& midiView)
     //const float frequency = audioParameters.get("frequency").getValue();
     const float volume = fromDecibels(audioParameters.get("volume").getValue());
 
-    while (midiView.hasNext())
+    while (const auto midiEventOptional = midiView.getNextEvent())
     {
-        const auto midiEvent = midiView.getNextEvent();
+        const auto midiEvent = midiEventOptional.value();
         if (midiEvent.isNoteOn())
         {
             const int noteNumber = midiEvent.getNoteNumber();

@@ -17,9 +17,9 @@ xynth::AudioParameterView getParameter(const std::string& id)
 	return { audioProcessor.getProcessor().audioParameters.get(id) };
 }
 
-void pushMidiEvent(uint32_t newEvent)
+void pushMidiEvent(uint32_t newEvent, uint32_t timeStamp)
 {
-	audioProcessor.webMidi.pushEvent(newEvent);
+	audioProcessor.webMidi.pushEvent(newEvent, timeStamp);
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
@@ -162,6 +162,7 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
 	// Connect the audio worklet node to the graph.
 	emscripten_audio_node_connect(wasmAudioWorklet, audioContext, 0, 0);
 
+	audioProcessor.audioContext.setNodeHandle(wasmAudioWorklet);
 	InitHtmlUi(audioContext);
 	onAudioProcessorInitialized(wasmAudioWorklet);
 }
@@ -200,6 +201,7 @@ int main()
 
 	// Create an audio context
 	EMSCRIPTEN_WEBAUDIO_T context = emscripten_create_audio_context(0 /* use default constructor options */);
+	audioProcessor.audioContext.setContextHandle(context);
     
 	// and kick off Audio Worklet scope initialization, which shares the Wasm
 	// Module and Memory to the AudioWorklet scope and initializes its stack.

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "WebAudio/WebMidi.h"
 #include "MidiEvent.h"
+#include <optional>
 
 namespace xynth
 {
@@ -9,15 +9,13 @@ namespace xynth
 class MidiView
 {
 public:
-    MidiView(WebMidi&);
-    ~MidiView();
+    MidiView(const MidiEvent*, int startOffset, int numEvents);
     
-    bool hasNext() const { return readIndex != writeIndex; }
-    MidiEvent getNextEvent();
+    std::optional<MidiEvent> getNextEvent();
 
 protected:
-    WebMidi& parent;
-    uint32_t readIndex, writeIndex;
+    const MidiEvent* eventBuffer;
+    int numEvents, currentIndex;
 
 };
 

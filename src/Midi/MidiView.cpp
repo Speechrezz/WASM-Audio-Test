@@ -1,24 +1,19 @@
 #include "MidiView.h"
+#include <emscripten.h>
 
 namespace xynth
 {
 
-MidiView::MidiView(WebMidi& p) : parent(p)
-{
-    readIndex = parent.getReadIndex();
-    writeIndex = parent.getWriteIndex();
-}
+MidiView::MidiView(const MidiEvent* buffer, int startOffset, int numEvents)
+    : eventBuffer(buffer), currentIndex(startOffset), numEvents(numEvents)
+{}
 
-MidiView::~MidiView()
+std::optional<MidiEvent> MidiView::getNextEvent()
 {
-    parent.setReadIndex(readIndex);
-}
+    if (currentIndex == numEvents)
+        return std::nullopt;
 
-MidiEvent MidiView::getNextEvent()
-{
-    MidiEvent midiEvent(parent[readIndex]);
-    readIndex = (readIndex + 1) % parent.getMaxEvents();
-    return midiEvent;
+    return eventBuffer[currentIndex++];
 }
 
 }

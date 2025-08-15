@@ -52,15 +52,18 @@
     return div;
   }
 
+  /**
+   * @param {AudioWorkletNode} node 
+   */ 
   function onAudioProcessorInitialized(node)
   {
     console.log("Init!");
-    console.log(node);
-    console.log(Module);
+    console.log("node", node);
+    console.log("Module", Module);
     document.body.appendChild(createSlider(node.parameters, "frequency"));
     document.body.appendChild(createSlider(node.parameters, "volume"));
 
-    initializeMIDI();
+    initializeMIDI(node);
   }
 </script>
 <body id="body">

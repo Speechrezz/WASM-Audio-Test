@@ -1,33 +1,39 @@
 #pragma once
 
 #include <emscripten/webaudio.h>
+#include "Audio/AudioCore.h"
 #include <vector>
 #include <assert.h>
 
 namespace xynth
 {
 
+class WebAudioContext
+{
+public:
+    void setNodeHandle(EMSCRIPTEN_AUDIO_WORKLET_NODE_T handle);
+    void setContextHandle(EMSCRIPTEN_WEBAUDIO_T handle);
+
+    void prepare(const ProcessSpec& newSpec) { spec = newSpec; }
+
+    double getCurrentFrame() const;
+    const ProcessSpec& getProcessSpec() const { return spec; }
+    
+protected:
+    EMSCRIPTEN_AUDIO_WORKLET_NODE_T nodeHandle;
+    EMSCRIPTEN_WEBAUDIO_T contextHandle;
+    ProcessSpec spec;
+
+};
+
 class AudioBufferWASM
 {
 public:
     AudioBufferWASM() = default;
 
-    void prepare(int numChannels)
-    {
-        channels.resize(numChannels, nullptr);
-    }
+    void prepare(int numChannels);
 
-	AudioBufferWASM& operator=(const AudioSampleFrame* audioFrame)
-	{
-        assert(audioFrame[0].numberOfChannels == channels.size());
-
-		numSamples = audioFrame[0].samplesPerChannel;
-
-        for (size_t i = 0; i < channels.size(); ++i)
-            channels[i] = audioFrame[0].data + i * numSamples;
-
-        return *this;
-	}
+	AudioBufferWASM& operator=(const AudioSampleFrame* audioFrame);
 
     int getNumChannels() const { return static_cast<int>(channels.size()); }
     int getNumSamples() const { return numSamples; }

@@ -32,11 +32,12 @@ float AudioParameterView::getValueFromString(const std::string& text) const
 
 // ---AudioProcessorWeb---
 
-AudioProcessorWeb::AudioProcessorWeb()
+AudioProcessorWeb::AudioProcessorWeb() : webMidi(audioContext)
 {}
 
 void AudioProcessorWeb::prepare(const ProcessSpec& spec)
 {
+	audioContext.prepare(spec);
     processor.prepare(spec);
     audioBufferWASM.prepare(spec.numChannels);
 }
@@ -46,7 +47,7 @@ void AudioProcessorWeb::process(AudioSampleFrame *outputs)
 	audioBufferWASM = outputs;
 	AudioView audioView(audioBufferWASM);
 
-	MidiView midiView(webMidi);
+	auto midiView = webMidi.createMidiView();
 
     processor.process(audioView, midiView);
 }
