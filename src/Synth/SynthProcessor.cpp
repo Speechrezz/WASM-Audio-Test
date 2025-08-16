@@ -56,6 +56,7 @@ void SynthProcessor::noteOn(const MidiEvent& midiEvent)
     reclaimVoices();
     const int noteNumber = midiEvent.getNoteNumber();
     const int channel = midiEvent.getChannel();
+    const float velocity = midiEvent.getVelocityFloat();
 
     if (activeNoteList.full())
     {
@@ -66,13 +67,13 @@ void SynthProcessor::noteOn(const MidiEvent& midiEvent)
         activeNoteList.pushBack(oldestNote);
 
         synthVoiceList[oldestNote.voiceIndex].stopNote(1.f, false);
-        synthVoiceList[oldestNote.voiceIndex].startNote(midiEvent.getNoteNumber(), 1.f, 0);
+        synthVoiceList[oldestNote.voiceIndex].startNote(midiEvent.getNoteNumber(), velocity, 0);
     }
     else
     {
         const size_t voiceIndex = inactiveVoiceList.popBack();
         activeNoteList.pushBack({ noteNumber, voiceIndex, channel });
-        synthVoiceList[voiceIndex].startNote(midiEvent.getNoteNumber(), 1.f, 0);
+        synthVoiceList[voiceIndex].startNote(midiEvent.getNoteNumber(), velocity, 0);
     }
 }
 

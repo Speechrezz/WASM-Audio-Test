@@ -19,6 +19,7 @@ public:
 
     int getNoteNumber() const { return static_cast<int>(d1); }
     int getVelocity() const { return static_cast<int>(d2); }
+    float getVelocityFloat() const;
 
     uint32_t getSamplePosition() const { return samplePosition; }
     uint8_t getChannel() const { return (status & 0x0f) + 1; }

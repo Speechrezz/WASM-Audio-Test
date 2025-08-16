@@ -22,4 +22,9 @@ MidiEvent::MidiEvent(uint32_t packedEvent, uint32_t samplePosition)
     )
 {}
 
+float MidiEvent::getVelocityFloat() const
+{
+    return float(getVelocity()) * (1.f / 127.f);
+}
+
 }
