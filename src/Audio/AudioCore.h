@@ -5,7 +5,7 @@ namespace xynth
  
 struct ProcessSpec
 {
-	int sampleRate;
+	double sampleRate;
 	int numChannels;
 	int maxBlockSize;
 };

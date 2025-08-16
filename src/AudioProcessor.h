@@ -6,6 +6,7 @@
 #include "Audio/AudioBuffer.h"
 #include "Audio/AudioCore.h"
 #include "Audio/AudioParameter.h"
+#include "Dsp/GainProcessor.h"
 #include "Midi/MidiView.h"
 #include "Synth/SynthProcessor.h"
 
@@ -23,8 +24,8 @@ public:
 	AudioParameters audioParameters;
 
 protected:
-	float frequency = 220.f;
 	SynthProcessor synth;
+	dsp::GainProcessor gain;
 
 };
 

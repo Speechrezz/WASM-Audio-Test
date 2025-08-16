@@ -10,7 +10,7 @@ namespace xynth
 
 AudioProcessor::AudioProcessor()
 {
-    audioParameters.add(AudioParameter::createFrequency("frequency", "Frequency", 20.f, 2000.f, 220.f ));
+    //audioParameters.add(AudioParameter::createFrequency("frequency", "Frequency", 20.f, 2000.f, 220.f ));
     
     auto* volumeParameter = new AudioParameter{ "volume", "Volume", -60.f, 0.f, -20.f };
     volumeParameter->valueToStringMapping = [](float value, int) { return floatToString(value, 2) + " dB"; };
@@ -20,15 +20,17 @@ AudioProcessor::AudioProcessor()
 void AudioProcessor::prepare(const ProcessSpec& spec)
 {
     synth.prepare(spec);
+    gain.prepare(spec);
+    gain.setDurationInSeconds(0.01);
 }
 
 void AudioProcessor::process(AudioView& audioView, MidiView& midiView)
 {
-    //const float frequency = audioParameters.get("frequency").getValue();
     const float volume = fromDecibels(audioParameters.get("volume").getValue());
+    gain.setTargetGainLinear(volume);
 
     synth.process(audioView, midiView);
-    audioView.multiplyBy(volume);
+    gain.process(audioView);
 }
 
 }

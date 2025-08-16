@@ -100,7 +100,7 @@ void PrepareAudio()
 {
 	xynth::ProcessSpec spec
 	{ 
-		.sampleRate = getSampleRate(), 
+		.sampleRate = static_cast<double>(getSampleRate()), 
 		.numChannels = getNumberOfChannels(), 
 		.maxBlockSize = getMaximumBlockSize()
 	};
