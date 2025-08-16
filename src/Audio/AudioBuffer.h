@@ -1,24 +1,52 @@
 #pragma once
 
 #include "WebAudio/WebAudio.h"
+#include <vector>
 
 namespace xynth
 {
 
+class AudioView;
+
+class AudioBuffer
+{
+public:
+	void resize(int numChannels, int numSamples);
+
+	int getNumChannels() const { return int(channels.size()); }
+	int getNumSamples()  const { return numSamples; }
+
+	float* const getChannelPointer(int channelIndex) const
+	{
+		return channels[channelIndex];
+	}
+
+protected:
+	friend AudioView;
+	std::vector<float> buffer;
+	std::vector<float*> channels;
+	int numSamples = 0;
+
+};
+
 class AudioView
 {
 public:
-	AudioView(const AudioBufferWASM& audioBufferWASM)
-	{
-		numChannels = audioBufferWASM.getNumChannels();
-		numSamples = audioBufferWASM.getNumSamples();
-		channels = audioBufferWASM.getChannels();
-	}
+	AudioView(const AudioBuffer& audioBuffer);
+	AudioView(const AudioBufferWASM& audioBufferWASM);
+	AudioView(float* const* channels, int numChannels, int startSample, int numSamples);
+
+	AudioView splice(int startOffset, int numSamples) const;
+
+	void fill(float value);
+	void multiplyBy(float value);
+
+	void addFrom(const AudioView& other);
 
 	int getNumChannels() const { return numChannels; }
 	int getNumSamples() const { return numSamples; }
 
-	float* getChannelPointer(int channelIndex)
+	float* const getChannelPointer(int channelIndex) const
 	{
 		return channels[channelIndex] + startSample;
 	}

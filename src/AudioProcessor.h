@@ -7,23 +7,10 @@
 #include "Audio/AudioCore.h"
 #include "Audio/AudioParameter.h"
 #include "Midi/MidiView.h"
+#include "Synth/SynthProcessor.h"
 
 namespace xynth
 {
-
-class SineOscillator
-{
-public:
-	SineOscillator() = default;
-
-	void prepare(const ProcessSpec& spec);
-	void process(AudioView& audioView, float frequency, float volume);
-
-protected:
-	float radiansCoefficient = 0.f;
-	float phase = 0.f;
-
-};
 
 class AudioProcessor
 {
@@ -37,7 +24,7 @@ public:
 
 protected:
 	float frequency = 220.f;
-	SineOscillator oscillator;
+	SynthProcessor synth;
 
 };
 

@@ -919,7 +919,7 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  93074: () => { return currentFrame; }
+  93474: () => { return currentFrame; }
 };
 function getSampleRate() { return new AudioContext().sampleRate; }
 function getNumberOfChannels() { const audioContext = new AudioContext(); const oscillator = audioContext.createOscillator(); const numChannels = oscillator.channelCount; oscillator.disconnect(); return numChannels; }

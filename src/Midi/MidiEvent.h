@@ -21,10 +21,10 @@ public:
     int getVelocity() const { return static_cast<int>(d2); }
 
     uint32_t getSamplePosition() const { return samplePosition; }
+    uint8_t getChannel() const { return (status & 0x0f) + 1; }
 
 protected:
     uint8_t getCommand() const { return status >> 4; }
-    uint8_t getChannel() const { return (status & 0x0f) + 1; }
 
     uint8_t status, d1, d2;
     uint32_t samplePosition;
