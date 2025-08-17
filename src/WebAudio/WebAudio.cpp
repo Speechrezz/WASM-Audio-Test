@@ -24,14 +24,14 @@ double WebAudioContext::getCurrentFrame() const
 }
 
 
-// ---AudioBufferWASM---
+// ---WebAudioBuffer---
 
-void AudioBufferWASM::prepare(int numChannels)
+void WebAudioBuffer::prepare(int numChannels)
 {
     channels.resize(numChannels, nullptr);
 }
 
-AudioBufferWASM& AudioBufferWASM::operator=(const AudioSampleFrame* audioFrame)
+void WebAudioBuffer::updateBuffer(const AudioSampleFrame* audioFrame)
 {
     assert(audioFrame[0].numberOfChannels == channels.size());
 
@@ -39,8 +39,11 @@ AudioBufferWASM& AudioBufferWASM::operator=(const AudioSampleFrame* audioFrame)
 
     for (size_t i = 0; i < channels.size(); ++i)
         channels[i] = audioFrame[0].data + i * numSamples;
+}
 
-    return *this;
+AudioView WebAudioBuffer::createView()
+{
+    return AudioView(channels.data(), getNumChannels(), 0, getNumSamples());
 }
 
 }

@@ -52,7 +52,7 @@ public:
 
 protected:
     AudioProcessor processor;
-    AudioBufferWASM audioBufferWASM;
+    WebAudioBuffer webAudioBuffer;
 
 };
 

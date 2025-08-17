@@ -2,6 +2,7 @@
 
 #include <emscripten/webaudio.h>
 #include "Audio/AudioCore.h"
+#include "Audio/AudioBuffer.h"
 #include <vector>
 #include <assert.h>
 
@@ -26,18 +27,18 @@ protected:
 
 };
 
-class AudioBufferWASM
+class WebAudioBuffer
 {
 public:
-    AudioBufferWASM() = default;
+    WebAudioBuffer() = default;
 
     void prepare(int numChannels);
-
-	AudioBufferWASM& operator=(const AudioSampleFrame* audioFrame);
+	void updateBuffer(const AudioSampleFrame* audioFrame);
+    
+    AudioView createView();
 
     int getNumChannels() const { return static_cast<int>(channels.size()); }
     int getNumSamples() const { return numSamples; }
-    float* const* getChannels() const { return channels.data(); }
 
 protected:
 	std::vector<float*> channels; 

@@ -20,23 +20,14 @@ void AudioBuffer::resize(int numChannels, int newNumSamples)
 
 // ---AudioView---
 
-AudioView::AudioView(const AudioBuffer& audioBuffer)
-{
-    numChannels = audioBuffer.getNumChannels();
-    numSamples = audioBuffer.getNumSamples();
-    channels = audioBuffer.channels.data();
-}
-
-AudioView::AudioView(const AudioBufferWASM& audioBufferWASM)
-{
-    numChannels = audioBufferWASM.getNumChannels();
-    numSamples = audioBufferWASM.getNumSamples();
-    channels = audioBufferWASM.getChannels();
-}
-
 AudioView::AudioView(float* const* channels, int numChannels, int startSample, int numSamples)
     : channels(channels), numChannels(numChannels), startSample(startSample), numSamples(numSamples)
 {}
+
+AudioView::AudioView(const AudioBuffer& audioBuffer)
+    : AudioView(audioBuffer.channels.data(), audioBuffer.getNumChannels(), 0, audioBuffer.getNumSamples())
+{}
+
 
 AudioView AudioView::splice(int newOffset, int newNumSamples) const
 {

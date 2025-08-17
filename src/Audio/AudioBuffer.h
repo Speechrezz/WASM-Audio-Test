@@ -1,6 +1,5 @@
 #pragma once
 
-#include "WebAudio/WebAudio.h"
 #include <vector>
 
 namespace xynth
@@ -32,9 +31,8 @@ protected:
 class AudioView
 {
 public:
-	AudioView(const AudioBuffer& audioBuffer);
-	AudioView(const AudioBufferWASM& audioBufferWASM);
 	AudioView(float* const* channels, int numChannels, int startSample, int numSamples);
+	AudioView(const AudioBuffer& audioBuffer);
 
 	AudioView splice(int startOffset, int numSamples) const;
 

@@ -39,15 +39,15 @@ void AudioProcessorWeb::prepare(const ProcessSpec& spec)
 {
 	audioContext.prepare(spec);
     processor.prepare(spec);
-    audioBufferWASM.prepare(spec.numChannels);
+    webAudioBuffer.prepare(spec.numChannels);
 }
 
 void AudioProcessorWeb::process(AudioSampleFrame *outputs)
 {
-	audioBufferWASM = outputs;
-	AudioView audioView(audioBufferWASM);
-
-	auto midiView = webMidi.createMidiView();
+	webAudioBuffer.updateBuffer(outputs);
+	
+	auto audioView = webAudioBuffer.createView();
+	auto midiView = webMidi.createView();
 
     processor.process(audioView, midiView);
 }
