@@ -23,7 +23,7 @@ public:
     MidiView createMidiView();
 
     void pushEvent(uint32_t event, uint32_t timeStamp);
-    const std::vector<MidiEvent>& readEvents();
+    std::vector<MidiEvent>& readEvents();
 
     uint32_t getMaxEvents() const { return static_cast<uint32_t>(sharedBuffer.size()); }
 

@@ -13,7 +13,7 @@ WebMidi::WebMidi(const WebAudioContext& c, int maxEvents)
 
 MidiView WebMidi::createMidiView()
 {
-    const auto& eventBuffer = readEvents();
+    auto& eventBuffer = readEvents();
     return { eventBuffer.data(), 0, static_cast<int>(eventBuffer.size()) };
 }
 
@@ -25,7 +25,7 @@ void WebMidi::pushEvent(uint32_t event, uint32_t timeStamp)
     setWriteIndex((writeIndex + 1u) % getMaxEvents());
 }
 
-const std::vector<MidiEvent>& WebMidi::readEvents()
+std::vector<MidiEvent>& WebMidi::readEvents()
 {
     uint32_t readIndex = getReadIndex();
     const uint32_t writeIndex = getWriteIndex();

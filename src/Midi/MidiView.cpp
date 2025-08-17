@@ -1,19 +1,27 @@
 #include "MidiView.h"
-#include <emscripten.h>
+#include "Core/Debug.h"
 
 namespace xynth
 {
 
-MidiView::MidiView(const MidiEvent* buffer, int startOffset, int numEvents)
-    : eventBuffer(buffer), currentIndex(startOffset), numEvents(numEvents)
+MidiView::MidiView(MidiEvent* buffer, int startOffset, int numEvents)
+    : eventBuffer(buffer), startOffset(startOffset), numEvents(numEvents)
 {}
 
-std::optional<MidiEvent> MidiView::getNextEvent()
-{
-    if (currentIndex == numEvents)
-        return std::nullopt;
+MidiView::MidiView(MidiEvent* buffer, int numEvents)
+    : MidiView(buffer, 0, numEvents)
+{}
 
-    return eventBuffer[currentIndex++];
+MidiEvent& MidiView::operator[](int index) noexcept
+{
+    XASSERT(index < numEvents);
+    return eventBuffer[index + startOffset];
+}
+
+const MidiEvent& MidiView::operator[](int index) const noexcept
+{
+    XASSERT(index < numEvents);
+    return eventBuffer[index + startOffset];
 }
 
 }

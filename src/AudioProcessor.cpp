@@ -26,10 +26,10 @@ void AudioProcessor::prepare(const ProcessSpec& spec)
 
 void AudioProcessor::process(AudioView& audioView, MidiView& midiView)
 {
+    synth.process(audioView, midiView);
+    
     const float volume = fromDecibels(audioParameters.get("volume").getValue());
     gain.setTargetGainLinear(volume);
-
-    synth.process(audioView, midiView);
     gain.process(audioView);
 }
 

@@ -20,11 +20,9 @@ void SynthProcessor::process(AudioView& audioView, MidiView& midiView)
     audioView.fill(0.f);
     int prevSamplePos = 0;
 
-    while (const auto midiEventOptional = midiView.getNextEvent())
+    for (const auto& midiEvent : midiView)
     {
-        const auto& midiEvent = midiEventOptional.value();
         const int samplesBetweenEvents = midiEvent.getSamplePosition() - prevSamplePos;
-
         renderSynthVoices(audioView, prevSamplePos, samplesBetweenEvents);
 
         prevSamplePos = midiEvent.getSamplePosition();
