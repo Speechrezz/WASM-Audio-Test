@@ -4,11 +4,11 @@ project(test LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS src/*.[ch]pp src/*.c src/*.h)
+file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS framework/*.[ch]pp framework/*.h src/*.[ch]pp src/*.h)
 
 add_executable(AudioWorklet ${MY_SOURCES})
 
-target_include_directories(AudioWorklet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(AudioWorklet PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/framework ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Emscripten") 
   # Emscripten specific compiler settings

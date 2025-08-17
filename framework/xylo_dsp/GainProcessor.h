@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Audio/AudioBuffer.h"
-#include "Audio/AudioCore.h"
+#include "xylo_audio/AudioBuffer.h"
+#include "xylo_audio/AudioCore.h"
 
 namespace xynth::dsp
 {

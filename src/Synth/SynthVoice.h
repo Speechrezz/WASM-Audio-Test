@@ -1,8 +1,8 @@
 #pragma once
 
 #include "SineOscillator.h"
-#include "Audio/AudioBuffer.h"
-#include "Dsp/GainProcessor.h"
+#include "xylo_audio/AudioBuffer.h"
+#include "xylo_dsp/GainProcessor.h"
 
 namespace xynth
 {

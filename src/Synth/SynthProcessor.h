@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Audio/AudioCore.h"
-#include "Audio/AudioBuffer.h"
+#include "xylo_audio/AudioCore.h"
+#include "xylo_audio/AudioBuffer.h"
 #include "NoteVector.h"
-#include "Midi/MidiView.h"
+#include "xylo_midi/MidiView.h"
 #include "SynthVoice.h"
 #include <array>
 

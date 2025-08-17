@@ -1,5 +1,5 @@
 #include "AudioProcessorWeb.h"
-#include "Midi/MidiView.h"
+#include "xylo_midi/MidiView.h"
 
 namespace xynth
 {

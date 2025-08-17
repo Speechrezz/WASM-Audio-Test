@@ -3,12 +3,12 @@
 #include <iostream>
 #include <stdlib.h>
 #include <cmath>
-#include "Audio/AudioBuffer.h"
-#include "Audio/AudioCore.h"
-#include "Audio/AudioParameter.h"
-#include "Dsp/GainProcessor.h"
-#include "Midi/MidiView.h"
-#include "Synth/SynthProcessor.h"
+#include "xylo_audio/AudioBuffer.h"
+#include "xylo_audio/AudioCore.h"
+#include "xylo_audio/AudioParameter.h"
+#include "xylo_dsp/GainProcessor.h"
+#include "xylo_midi/MidiView.h"
+#include "synth/SynthProcessor.h"
 
 namespace xynth
 {

@@ -5,7 +5,7 @@
 #include "WebMidi.h"
 #include "WebAudio.h"
 #include "AudioProcessor.h"
-#include "Audio/AudioBuffer.h"
+#include "xylo_audio/AudioBuffer.h"
 
 namespace xynth
 {

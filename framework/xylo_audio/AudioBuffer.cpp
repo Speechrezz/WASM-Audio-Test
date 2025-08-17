@@ -1,5 +1,5 @@
 #include "AudioBuffer.h"
-#include "Core/Debug.h"
+#include "xylo_core/Debug.h"
 
 namespace xynth
 {

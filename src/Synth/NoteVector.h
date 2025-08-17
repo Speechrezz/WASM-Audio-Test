@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "Core/SmallVector.h"
+#include "xylo_core/SmallVector.h"
 #include <cstdint>
 #include <string>
 

@@ -2,6 +2,8 @@
 
 Attempt at a framework for creating audio software that runs in the browser via WASM. C++ for the audio processing, standard web technologies for the user interface.
 
+Working name: Xylo.
+
 ## Goals
 
 - Use [Emscripten](https://github.com/emscripten-core/emscripten) to compile C++ to WASM.

@@ -2,7 +2,7 @@
 
 #include <emscripten/webaudio.h>
 #include "WebAudio.h"
-#include "Midi/MidiView.h"
+#include "xylo_midi/MidiView.h"
 #include <vector>
 #include <atomic>
 

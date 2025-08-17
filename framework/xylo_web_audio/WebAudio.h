@@ -1,8 +1,8 @@
 #pragma once
 
 #include <emscripten/webaudio.h>
-#include "Audio/AudioCore.h"
-#include "Audio/AudioBuffer.h"
+#include "xylo_audio/AudioCore.h"
+#include "xylo_audio/AudioBuffer.h"
 #include <vector>
 #include <assert.h>
 

@@ -1,6 +1,6 @@
 #include "AudioProcessor.h"
-#include "Audio/AudioMath.h"
-#include "Text/ParameterText.h"
+#include "xylo_audio/AudioMath.h"
+#include "xylo_text/ParameterText.h"
 
 namespace xynth
 {
