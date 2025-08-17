@@ -20,7 +20,7 @@ public:
 public:
     WebMidi(const WebAudioContext&, int maxEvents = 512);
 
-    MidiView createMidiView();
+    MidiView createView();
 
     void pushEvent(uint32_t event, uint32_t timeStamp);
     std::vector<MidiEvent>& readEvents();

@@ -11,7 +11,7 @@ WebMidi::WebMidi(const WebAudioContext& c, int maxEvents)
     localBuffer.reserve(maxEvents);
 }
 
-MidiView WebMidi::createMidiView()
+MidiView WebMidi::createView()
 {
     auto& eventBuffer = readEvents();
     return { eventBuffer.data(), 0, static_cast<int>(eventBuffer.size()) };
