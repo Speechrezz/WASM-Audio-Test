@@ -6,7 +6,7 @@
 #include <vector>
 #include <assert.h>
 
-namespace xynth
+namespace xylo
 {
 
 class WebAudioContext

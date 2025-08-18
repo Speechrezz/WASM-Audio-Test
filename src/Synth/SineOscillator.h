@@ -13,8 +13,8 @@ public:
 	SineOscillator() = default;
 
 	void reset();
-	void prepare(const ProcessSpec& spec);
-	void process(AudioView& audioView, float frequency, float volume);
+	void prepare(const xylo::ProcessSpec& spec);
+	void process(xylo::AudioView& audioView, float frequency, float volume);
 
 protected:
 	float radiansCoefficient = 0.f;

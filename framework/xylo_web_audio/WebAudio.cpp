@@ -1,6 +1,6 @@
 #include "WebAudio.h"
 
-namespace xynth
+namespace xylo
 {
 
 

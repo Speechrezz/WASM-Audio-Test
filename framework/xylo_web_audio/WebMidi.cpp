@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 
-namespace xynth
+namespace xylo
 {
 
 WebMidi::WebMidi(const WebAudioContext& c, int maxEvents) 

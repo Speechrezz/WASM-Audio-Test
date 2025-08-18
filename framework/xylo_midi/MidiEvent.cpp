@@ -1,7 +1,7 @@
 #include "MidiEvent.h"
 #include <cmath>
 
-namespace xynth
+namespace xylo
 {
 
 float noteNumberToFrequency(int noteNumber, float frequencyOfA)

@@ -3,7 +3,7 @@
 #include "MidiEvent.h"
 #include <cstddef>
 
-namespace xynth
+namespace xylo
 {
 
 class MidiView

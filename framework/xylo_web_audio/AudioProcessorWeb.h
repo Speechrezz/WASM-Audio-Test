@@ -7,7 +7,7 @@
 #include "AudioProcessor.h"
 #include "xylo_audio/AudioBuffer.h"
 
-namespace xynth
+namespace xylo
 {
 
 // AudioParameter wrapper

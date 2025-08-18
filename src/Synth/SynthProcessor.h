@@ -18,15 +18,15 @@ public:
 public:
     SynthProcessor();
 
-    void prepare(const ProcessSpec&);
-    void process(AudioView& audioView, MidiView& midiView);
+    void prepare(const xylo::ProcessSpec&);
+    void process(xylo::AudioView& audioView, xylo::MidiView& midiView);
 
 protected:
-    void renderSynthVoices(AudioView&, int prevSamplePos, int samplesBetweenEvents);
-    void handleMidiEvent(const MidiEvent&);
+    void renderSynthVoices(xylo::AudioView&, int prevSamplePos, int samplesBetweenEvents);
+    void handleMidiEvent(const xylo::MidiEvent&);
 
-    void noteOn (const MidiEvent&);
-    void noteOff(const MidiEvent&);
+    void noteOn (const xylo::MidiEvent&);
+    void noteOff(const xylo::MidiEvent&);
 
     void reclaimVoices();
 
@@ -34,7 +34,7 @@ protected:
     std::array<SynthVoice, maxVoiceCount> synthVoiceList;
     
     NoteVector<maxVoiceCount> activeNoteList;
-    SmallVector<size_t, maxVoiceCount> inactiveVoiceList;
+    xylo::SmallVector<size_t, maxVoiceCount> inactiveVoiceList;
 
 };
 

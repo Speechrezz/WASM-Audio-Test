@@ -3,7 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 
-namespace xynth
+namespace xylo
 {
     
 std::string floatToString(float value, int maxLength)

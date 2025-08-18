@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace xynth
+namespace xylo
 {
 
 // Linear interpolation

@@ -6,7 +6,7 @@
 #include <vector>
 #include <atomic>
 
-namespace xynth
+namespace xylo
 {
 
 class WebMidi

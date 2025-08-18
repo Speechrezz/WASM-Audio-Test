@@ -1,7 +1,7 @@
 #include "AudioProcessorWeb.h"
 #include "xylo_midi/MidiView.h"
 
-namespace xynth
+namespace xylo
 {
 
 // ---AudioParameterView---

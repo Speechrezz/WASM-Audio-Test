@@ -10,23 +10,18 @@
 #include "xylo_midi/MidiView.h"
 #include "synth/SynthProcessor.h"
 
-namespace xynth
-{
-
 class AudioProcessor
 {
 public:
 	AudioProcessor();
 
-	void prepare(const ProcessSpec& spec);
-	void process(AudioView& audioView, MidiView& midiView);
+	void prepare(const xylo::ProcessSpec& spec);
+	void process(xylo::AudioView& audioView, xylo::MidiView& midiView);
 
-	AudioParameters audioParameters;
+	xylo::AudioParameters audioParameters;
 
 protected:
-	SynthProcessor synth;
-	dsp::GainProcessor gain;
+	xynth::SynthProcessor synth;
+	xylo::dsp::GainProcessor gain;
 
 };
-
-}

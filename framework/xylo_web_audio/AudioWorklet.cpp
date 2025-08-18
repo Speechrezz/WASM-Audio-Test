@@ -5,14 +5,14 @@
 #include <assert.h>
 #include "AudioProcessorWeb.h"
 
-inline xynth::AudioProcessorWeb audioProcessor;
+inline xylo::AudioProcessorWeb audioProcessor;
 
 int parameterIdToIndex(const std::string& id)
 {
 	return audioProcessor.parameterIdToIndex[id];
 }
 
-xynth::AudioParameterView getParameter(const std::string& id)
+xylo::AudioParameterView getParameter(const std::string& id)
 {
 	return { audioProcessor.getProcessor().audioParameters.get(id) };
 }
@@ -23,13 +23,13 @@ void pushMidiEvent(uint32_t newEvent, uint32_t timeStamp)
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
-	emscripten::class_<xynth::AudioParameterView>("AudioParameterView")
-		.function("getName", &xynth::AudioParameterView::getName)
-		.function("getId", &xynth::AudioParameterView::getId)
-		.function("convertToNormalizedValue", &xynth::AudioParameterView::convertToNormalizedValue)
-		.function("convertFromNormalizedValue", &xynth::AudioParameterView::convertFromNormalizedValue)
-		.function("getValueToString", &xynth::AudioParameterView::getValueToString)
-		.function("getValueFromString", &xynth::AudioParameterView::getValueFromString);
+	emscripten::class_<xylo::AudioParameterView>("AudioParameterView")
+		.function("getName", &xylo::AudioParameterView::getName)
+		.function("getId", &xylo::AudioParameterView::getId)
+		.function("convertToNormalizedValue", &xylo::AudioParameterView::convertToNormalizedValue)
+		.function("convertFromNormalizedValue", &xylo::AudioParameterView::convertFromNormalizedValue)
+		.function("getValueToString", &xylo::AudioParameterView::getValueToString)
+		.function("getValueFromString", &xylo::AudioParameterView::getValueFromString);
 
     emscripten::function("parameterIdToIndex", &parameterIdToIndex);
     emscripten::function("getParameter", &getParameter);
@@ -98,7 +98,7 @@ inline int getMaximumBlockSize()
 
 void PrepareAudio()
 {
-	xynth::ProcessSpec spec
+	xylo::ProcessSpec spec
 	{ 
 		.sampleRate = static_cast<double>(getSampleRate()), 
 		.numChannels = getNumberOfChannels(), 

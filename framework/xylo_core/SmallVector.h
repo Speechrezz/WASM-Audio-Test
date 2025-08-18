@@ -13,7 +13,7 @@
 #include "Debug.h"
 #include <array>
 
-namespace xynth
+namespace xylo
 {
 
 template<typename T, size_t maxSize>

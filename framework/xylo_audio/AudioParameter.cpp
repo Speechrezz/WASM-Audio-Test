@@ -3,7 +3,7 @@
 #include "xylo_text/ParameterText.h"
 #include <algorithm>
 
-namespace xynth
+namespace xylo
 {
 
 // ---Parameter---

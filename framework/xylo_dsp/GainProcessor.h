@@ -3,7 +3,7 @@
 #include "xylo_audio/AudioBuffer.h"
 #include "xylo_audio/AudioCore.h"
 
-namespace xynth::dsp
+namespace xylo::dsp
 {
 
 class GainProcessor

@@ -9,13 +9,13 @@ SynthProcessor::SynthProcessor()
         inactiveVoiceList.pushBack(i);
 }
 
-void SynthProcessor::prepare(const ProcessSpec& spec)
+void SynthProcessor::prepare(const xylo::ProcessSpec& spec)
 {
     for (auto& synthVoice : synthVoiceList)
         synthVoice.prepare(spec);
 }
 
-void SynthProcessor::process(AudioView& audioView, MidiView& midiView)
+void SynthProcessor::process(xylo::AudioView& audioView, xylo::MidiView& midiView)
 {
     audioView.fill(0.f);
     int prevSamplePos = 0;
@@ -34,14 +34,14 @@ void SynthProcessor::process(AudioView& audioView, MidiView& midiView)
     renderSynthVoices(audioView, prevSamplePos, samplesBetweenEvents);
 }
 
-void SynthProcessor::renderSynthVoices(AudioView& audioView, int prevSamplePos, int samplesBetweenEvents)
+void SynthProcessor::renderSynthVoices(xylo::AudioView& audioView, int prevSamplePos, int samplesBetweenEvents)
 {
     auto splicedView = audioView.splice(prevSamplePos, samplesBetweenEvents);
     for (auto& synthVoice : synthVoiceList)
         synthVoice.renderNextBlock(splicedView);
 }
 
-void SynthProcessor::handleMidiEvent(const MidiEvent& midiEvent)
+void SynthProcessor::handleMidiEvent(const xylo::MidiEvent& midiEvent)
 {
     if (midiEvent.isNoteOn())
         noteOn(midiEvent);
@@ -49,7 +49,7 @@ void SynthProcessor::handleMidiEvent(const MidiEvent& midiEvent)
         noteOff(midiEvent);
 }
 
-void SynthProcessor::noteOn(const MidiEvent& midiEvent)
+void SynthProcessor::noteOn(const xylo::MidiEvent& midiEvent)
 {
     reclaimVoices();
     const int noteNumber = midiEvent.getNoteNumber();
@@ -75,7 +75,7 @@ void SynthProcessor::noteOn(const MidiEvent& midiEvent)
     }
 }
 
-void SynthProcessor::noteOff(const MidiEvent& midiEvent)
+void SynthProcessor::noteOff(const xylo::MidiEvent& midiEvent)
 {
     const int messageNoteNumber = midiEvent.getNoteNumber();
     const int messageChannel = midiEvent.getChannel();

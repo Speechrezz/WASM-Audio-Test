@@ -1,6 +1,6 @@
 #pragma once
 
-namespace xynth
+namespace xylo
 {
  
 struct ProcessSpec

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace xynth
+namespace xylo
 {
 
 class AudioView;

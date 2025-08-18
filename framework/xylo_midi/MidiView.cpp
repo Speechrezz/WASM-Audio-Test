@@ -1,7 +1,7 @@
 #include "MidiView.h"
 #include "xylo_core/Debug.h"
 
-namespace xynth
+namespace xylo
 {
 
 MidiView::MidiView(MidiEvent* buffer, int startOffset, int numEvents)

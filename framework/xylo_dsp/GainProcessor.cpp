@@ -1,7 +1,7 @@
 #include "GainProcessor.h"
 #include <cmath>
 
-namespace xynth::dsp
+namespace xylo::dsp
 {
 
 void GainProcessor::reset() noexcept

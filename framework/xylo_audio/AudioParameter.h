@@ -5,7 +5,7 @@
 #include <functional>
 #include <memory>
 
-namespace xynth
+namespace xylo
 {
 
 class AudioParameter

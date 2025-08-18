@@ -47,7 +47,7 @@ struct NoteContext
 };
 
 template<size_t maxSize>
-class NoteVector : public SmallVector<NoteContext, maxSize>
+class NoteVector : public xylo::SmallVector<NoteContext, maxSize>
 {
 public:
     size_t findNote(int noteNumber)

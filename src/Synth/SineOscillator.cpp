@@ -8,13 +8,13 @@ void SineOscillator::reset()
     phase = 0.f;
 }
 
-void SineOscillator::prepare(const ProcessSpec& spec)
+void SineOscillator::prepare(const xylo::ProcessSpec& spec)
 {
     phase = 0.f;
     radiansCoefficient = 2.f * M_PI / float(spec.sampleRate);
 }
 
-void SineOscillator::process(AudioView& audioView, float frequency, float volume)
+void SineOscillator::process(xylo::AudioView& audioView, float frequency, float volume)
 {
     const float phaseOffset = frequency * radiansCoefficient;
     float currentPhase = phase;

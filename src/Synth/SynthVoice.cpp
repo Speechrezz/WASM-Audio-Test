@@ -3,7 +3,7 @@
 namespace xynth
 {
 
-void SynthVoice::prepare(const ProcessSpec& spec)
+void SynthVoice::prepare(const xylo::ProcessSpec& spec)
 {
     voiceBuffer.resize(spec.numChannels, spec.maxBlockSize);
     osc.prepare(spec);
@@ -12,12 +12,12 @@ void SynthVoice::prepare(const ProcessSpec& spec)
     gain.setDurationInSeconds(0.002);
 }
 
-void SynthVoice::renderNextBlock(AudioView& outputView)
+void SynthVoice::renderNextBlock(xylo::AudioView& outputView)
 {
     if (!isCurrentPlaying() || outputView.getNumSamples() == 0)
         return;
 
-    auto voiceView = AudioView(voiceBuffer).splice(0, outputView.getNumSamples());
+    auto voiceView = xylo::AudioView(voiceBuffer).splice(0, outputView.getNumSamples());
     osc.process(voiceView, frequency, velocity);
     gain.process(voiceView);
 
@@ -26,7 +26,7 @@ void SynthVoice::renderNextBlock(AudioView& outputView)
 
 void SynthVoice::startNote(int midiNoteNumber, float newVelocity, int)
 {
-    frequency = noteNumberToFrequency(midiNoteNumber);
+    frequency = xylo::noteNumberToFrequency(midiNoteNumber);
     velocity = newVelocity;
     osc.reset();
 

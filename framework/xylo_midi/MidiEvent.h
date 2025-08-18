@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace xynth
+namespace xylo
 {
 
 float noteNumberToFrequency(int noteNumber, float frequencyOfA = 440.f);
