@@ -35,6 +35,11 @@ AudioView AudioView::splice(int newOffset, int newNumSamples) const
     return { channels, numChannels, startSample + newOffset, newNumSamples };
 }
 
+void AudioView::reset()
+{
+    fill(0.f);
+}
+
 void AudioView::fill(float value)
 {
     for (int ch = 0; ch < getNumChannels(); ++ch)

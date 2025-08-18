@@ -36,6 +36,7 @@ public:
 
 	AudioView splice(int startOffset, int numSamples) const;
 
+	void reset();
 	void fill(float value);
 	void multiplyBy(float value);
 

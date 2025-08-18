@@ -2,7 +2,7 @@
 
 #include "SineOscillator.h"
 #include "xylo_audio/AudioBuffer.h"
-#include "xylo_dsp/GainProcessor.h"
+#include "xylo_dsp/ADSRProcessor.h"
 
 namespace xynth
 {
@@ -18,13 +18,13 @@ public:
 
     bool isCurrentPlaying() const 
     { 
-        return !gain.isSilent(); 
+        return adsr.isCurrentlyPlaying(); 
     }
 
 protected:
     xylo::AudioBuffer voiceBuffer;
     SineOscillator osc;
-    xylo::dsp::GainProcessor gain;
+    xylo::dsp::ADSRProcessor adsr;
     float frequency = 0.f, velocity = 1.f;
     bool noteOnFlag = false;
 
