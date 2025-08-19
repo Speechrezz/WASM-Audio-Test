@@ -11,25 +11,46 @@ AudioProcessor::AudioProcessor() : synth(audioParameters)
     volumeParameter->valueToStringMapping = [](float value, int) { return xylo::floatToString(value, 2) + " dB"; };
     audioParameters.add(volumeParameter);
 
+
     // ---ADSR---
+    const auto toNormalizedMappingTime = [](float minValue, float maxValue, float value)
+    {
+        value -= minValue;
+        value /= maxValue - minValue;
+        return std::pow(value, 0.5f);
+    };
+    const auto fromNormalizedMappingTime = [](float minValue, float maxValue, float normalizedValue)
+    {
+        float value = std::pow(normalizedValue, 2.f);
+        value *= maxValue - minValue;
+        return value + minValue;
+    };
+
     auto* attackParameter = new xylo::AudioParameter{ "attack", "Attack", 0.f, 1000.f, 0.f };
     attackParameter->valueToStringMapping = xylo::msAsText;
+    attackParameter->toNormalizedMapping = toNormalizedMappingTime;
+    attackParameter->fromNormalizedMapping = fromNormalizedMappingTime;
     audioParameters.add(attackParameter);
 
     auto* decayParameter = new xylo::AudioParameter{ "decay", "Decay", 0.f, 1000.f, 200.f };
     decayParameter->valueToStringMapping = xylo::msAsText;
+    decayParameter->toNormalizedMapping = toNormalizedMappingTime;
+    decayParameter->fromNormalizedMapping = fromNormalizedMappingTime;
     audioParameters.add(decayParameter);
 
     audioParameters.add(new xylo::AudioParameter{ "sustain", "Sustain", 0.f, 1.f, 0.5f });
 
     auto* releaseParameter = new xylo::AudioParameter{ "release", "Release", 0.f, 1000.f, 200.f };
     releaseParameter->valueToStringMapping = xylo::msAsText;
+    releaseParameter->toNormalizedMapping = toNormalizedMappingTime;
+    releaseParameter->fromNormalizedMapping = fromNormalizedMappingTime;
     audioParameters.add(releaseParameter);
 }
 
 void AudioProcessor::prepare(const xylo::ProcessSpec& spec)
 {
-    DBG("prepare() - sampleRate: " << spec.sampleRate << ", maxBlockSize: " << spec.maxBlockSize << ", numChannels: " << spec.numChannels);
+    DBG("prepare() - sampleRate: " << spec.sampleRate << ", maxBlockSize: " 
+        << spec.maxBlockSize << ", numChannels: " << spec.numChannels);
     
     synth.prepare(spec);
     gain.prepare(spec);

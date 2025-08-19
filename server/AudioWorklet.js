@@ -6873,8 +6873,8 @@ function checkIncomingModuleAPI() {
   ignoredModuleProp('fetchSettings');
 }
 var ASM_CONSTS = {
-  94109: () => { return currentFrame; },  
- 94134: ($0, $1) => { const ptr = $0; const len = $1; const str = UTF8ToString(ptr, len); console.log("[DEBUG] " + str); }
+  94541: () => { return currentFrame; },  
+ 94566: ($0, $1) => { const ptr = $0; const len = $1; const str = UTF8ToString(ptr, len); console.log("[DEBUG] " + str); }
 };
 function getSampleRate() { return new AudioContext().sampleRate; }
 function getNumberOfChannels() { const audioContext = new AudioContext(); const oscillator = audioContext.createOscillator(); const numChannels = oscillator.channelCount; oscillator.disconnect(); return numChannels; }
