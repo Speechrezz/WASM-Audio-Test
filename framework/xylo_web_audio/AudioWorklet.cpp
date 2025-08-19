@@ -122,7 +122,8 @@ EM_JS(void, InitHtmlUi, (EMSCRIPTEN_WEBAUDIO_T audioContext), {
 	// Add a button on the page to toggle playback as a response to user click.
 	let startButton = document.createElement('button');
 	startButton.innerHTML = 'Toggle playback';
-	document.body.appendChild(startButton);
+	const headerContainer = document.getElementById("header-container");
+	headerContainer.appendChild(startButton);
 
 	audioContext = emscriptenGetAudioObject(audioContext);
 	startButton.onclick = () =>

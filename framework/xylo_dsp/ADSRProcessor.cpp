@@ -3,6 +3,14 @@
 namespace xylo::dsp
 {
 
+bool ADSRProcessor::Parameters::operator==(const Parameters& other) const
+{
+    return attackTime  == other.attackTime
+        && decayTime   == other.decayTime
+        && sustainGain == other.sustainGain
+        && releaseTime == other.releaseTime;
+}
+
 void ADSRProcessor::reset() noexcept
 {
     state = State::off;
@@ -64,7 +72,7 @@ float calculateStepSize(float difference, float duration, float sampleRate)
     return duration > 0.f ? (difference / (duration * sampleRate)) : 0.f;
 }
 
-void ADSRProcessor::updateParameters(Parameters parametersInSeconds) noexcept
+void ADSRProcessor::updateParameters(const Parameters& parametersInSeconds) noexcept
 {
     parameters = parametersInSeconds;
 
@@ -90,7 +98,7 @@ void ADSRProcessor::noteOn() noexcept
         state = State::sustain;
         currentValue = parameters.sustainGain;
     }
-    
+
     timePassed = 0.f;
 }
 

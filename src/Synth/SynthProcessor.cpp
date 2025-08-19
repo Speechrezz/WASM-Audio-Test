@@ -3,7 +3,7 @@
 namespace xynth
 {
     
-SynthProcessor::SynthProcessor()
+SynthProcessor::SynthProcessor(xylo::AudioParameters& p) : parameters(p)
 {
     for (size_t i = maxVoiceCount; i-- > 0;)
         inactiveVoiceList.pushBack(i);
@@ -17,6 +17,21 @@ void SynthProcessor::prepare(const xylo::ProcessSpec& spec)
 
 void SynthProcessor::process(xylo::AudioView& audioView, xylo::MidiView& midiView)
 {
+    xylo::dsp::ADSRProcessor::Parameters newAdsrParameters
+    {
+        .attackTime  = 1e-3f * parameters.get("attack").getValue(),
+        .decayTime   = 1e-3f * parameters.get("decay").getValue(),
+        .sustainGain = parameters.get("sustain").getValue(),
+        .releaseTime = 1e-3f * parameters.get("release").getValue()
+    };
+
+    if (adsrParameters != newAdsrParameters)
+    {
+        adsrParameters = newAdsrParameters;
+        for (auto& voice : synthVoiceList)
+            voice.updateADSR(adsrParameters);
+    }
+
     audioView.fill(0.f);
     int prevSamplePos = 0;
 

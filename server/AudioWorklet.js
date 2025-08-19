@@ -919,12 +919,12 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  92338: () => { return currentFrame; }
+  92825: () => { return currentFrame; }
 };
 function getSampleRate() { return new AudioContext().sampleRate; }
 function getNumberOfChannels() { const audioContext = new AudioContext(); const oscillator = audioContext.createOscillator(); const numChannels = oscillator.channelCount; oscillator.disconnect(); return numChannels; }
 function onAudioProcessorInitialized(nodeHandle) { if (typeof onAudioProcessorInitialized === 'function') { onAudioProcessorInitialized(EmAudio[nodeHandle]); } }
-function InitHtmlUi(audioContext) { let startButton = document.createElement('button'); startButton.innerHTML = 'Toggle playback'; document.body.appendChild(startButton); audioContext = emscriptenGetAudioObject(audioContext); startButton.onclick = () => { if (audioContext.state != 'running') { audioContext.resume(); } else { audioContext.suspend(); } }; }
+function InitHtmlUi(audioContext) { let startButton = document.createElement('button'); startButton.innerHTML = 'Toggle playback'; const headerContainer = document.getElementById("header-container"); headerContainer.appendChild(startButton); audioContext = emscriptenGetAudioObject(audioContext); startButton.onclick = () => { if (audioContext.state != 'running') { audioContext.resume(); } else { audioContext.suspend(); } }; }
 
 // end include: preamble.js
 

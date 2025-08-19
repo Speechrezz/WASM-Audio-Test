@@ -17,6 +17,9 @@ public:
     struct Parameters
     {
         float attackTime, decayTime, sustainGain, releaseTime;
+
+        bool operator==(const Parameters& other) const;
+        bool operator!=(const Parameters& other) const { return !operator==(other); }
     };
 
 public:
@@ -25,7 +28,7 @@ public:
     void process(AudioView&) noexcept;
     float getNextSample() noexcept;
     
-    void updateParameters(Parameters parametersInSeconds) noexcept;
+    void updateParameters(const Parameters& parametersInSeconds) noexcept;
     bool isCurrentlyPlaying() const noexcept { return state != State::off; }
 
     void noteOn() noexcept;

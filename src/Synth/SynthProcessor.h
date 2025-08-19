@@ -2,8 +2,9 @@
 
 #include "xylo_audio/AudioCore.h"
 #include "xylo_audio/AudioBuffer.h"
-#include "NoteVector.h"
+#include "xylo_audio/AudioParameter.h"
 #include "xylo_midi/MidiView.h"
+#include "NoteVector.h"
 #include "SynthVoice.h"
 #include <array>
 
@@ -16,7 +17,7 @@ public:
     static constexpr size_t maxVoiceCount = 16;
 
 public:
-    SynthProcessor();
+    SynthProcessor(xylo::AudioParameters&);
 
     void prepare(const xylo::ProcessSpec&);
     void process(xylo::AudioView& audioView, xylo::MidiView& midiView);
@@ -31,10 +32,13 @@ protected:
     void reclaimVoices();
 
 protected:
+    xylo::AudioParameters& parameters;
     std::array<SynthVoice, maxVoiceCount> synthVoiceList;
     
     NoteVector<maxVoiceCount> activeNoteList;
     xylo::SmallVector<size_t, maxVoiceCount> inactiveVoiceList;
+
+    xylo::dsp::ADSRProcessor::Parameters adsrParameters;
 
 };
 

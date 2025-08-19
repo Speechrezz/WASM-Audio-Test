@@ -45,4 +45,9 @@ void SynthVoice::stopNote(float, bool allowTailOff)
     noteOnFlag = false;
 }
 
+void SynthVoice::updateADSR(const xylo::dsp::ADSRProcessor::Parameters& parameters)
+{
+    adsr.updateParameters(parameters);
+}
+
 }

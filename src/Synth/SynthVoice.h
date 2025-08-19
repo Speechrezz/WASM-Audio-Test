@@ -21,6 +21,8 @@ public:
         return adsr.isCurrentlyPlaying(); 
     }
 
+    void updateADSR(const xylo::dsp::ADSRProcessor::Parameters&);
+
 protected:
     xylo::AudioBuffer voiceBuffer;
     SineOscillator osc;
