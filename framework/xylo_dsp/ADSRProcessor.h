@@ -36,13 +36,15 @@ public:
 
 protected:
     void updateState() noexcept;
+    void setState(State state) noexcept;
 
     State state = State::off;
     float sampleRate = -1.0;
     Parameters parameters;
+    float offset = 0.f; // Between 0 and 1
+    float timeStep = 0.f;
     float attackStep = 0.f, decayStep = 0.f, releaseStep = 0.f;
-    float timePassed = 0.f, timeStep = 0.f;
-    float currentValue = 0.f;
+    float currentValue = 0.f, startValue = 0.f, targetValue = 0.f;
 
 };
 

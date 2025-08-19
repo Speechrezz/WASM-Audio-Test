@@ -919,8 +919,8 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  93433: () => { return currentFrame; },  
- 93458: ($0, $1) => { const ptr = $0; const len = $1; const str = UTF8ToString(ptr, len); console.log("[DEBUG] " + str); }
+  93545: () => { return currentFrame; },  
+ 93570: ($0, $1) => { const ptr = $0; const len = $1; const str = UTF8ToString(ptr, len); console.log("[DEBUG] " + str); }
 };
 function getSampleRate() { return new AudioContext().sampleRate; }
 function getNumberOfChannels() { const audioContext = new AudioContext(); const oscillator = audioContext.createOscillator(); const numChannels = oscillator.channelCount; oscillator.disconnect(); return numChannels; }
