@@ -1,4 +1,5 @@
 #include "WebAudio.h"
+#include "xylo_core/Debug.h"
 
 namespace xylo
 {
@@ -33,7 +34,7 @@ void WebAudioBuffer::prepare(int numChannels)
 
 void WebAudioBuffer::updateBuffer(const AudioSampleFrame* audioFrame)
 {
-    assert(audioFrame[0].numberOfChannels == channels.size());
+    XASSERT(audioFrame[0].numberOfChannels == channels.size());
 
     numSamples = audioFrame[0].samplesPerChannel;
 

@@ -192,7 +192,7 @@ void WebAudioWorkletThreadInitialized(EMSCRIPTEN_WEBAUDIO_T audioContext, bool s
 // all share the same AudioWorkerGlobalScope, i.e. they all run on the same one
 // audio thread (multiple nodes/processors do not each get their own thread).
 // Hence one stack is enough.
-uint8_t wasmAudioWorkletStack[4096];
+uint8_t wasmAudioWorkletStack[8192];
 
 int main()
 {
