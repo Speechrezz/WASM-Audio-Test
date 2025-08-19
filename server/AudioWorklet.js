@@ -919,7 +919,8 @@ function dbg(...args) {
 // === Body ===
 
 var ASM_CONSTS = {
-  92825: () => { return currentFrame; }
+  93433: () => { return currentFrame; },  
+ 93458: ($0, $1) => { const ptr = $0; const len = $1; const str = UTF8ToString(ptr, len); console.log("[DEBUG] " + str); }
 };
 function getSampleRate() { return new AudioContext().sampleRate; }
 function getNumberOfChannels() { const audioContext = new AudioContext(); const oscillator = audioContext.createOscillator(); const numChannels = oscillator.channelCount; oscillator.disconnect(); return numChannels; }
@@ -3219,6 +3220,10 @@ function InitHtmlUi(audioContext) { let startButton = document.createElement('bu
       return ASM_CONSTS[code](...args);
     };
   var _emscripten_asm_const_double = (code, sigPtr, argbuf) => {
+      return runEmAsmFunction(code, sigPtr, argbuf);
+    };
+
+  var _emscripten_asm_const_int = (code, sigPtr, argbuf) => {
       return runEmAsmFunction(code, sigPtr, argbuf);
     };
 
@@ -6267,6 +6272,8 @@ var wasmImports = {
   _tzset_js: __tzset_js,
   /** @export */
   emscripten_asm_const_double: _emscripten_asm_const_double,
+  /** @export */
+  emscripten_asm_const_int: _emscripten_asm_const_int,
   /** @export */
   emscripten_audio_node_connect: _emscripten_audio_node_connect,
   /** @export */

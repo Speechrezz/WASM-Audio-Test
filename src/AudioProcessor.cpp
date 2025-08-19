@@ -29,6 +29,8 @@ AudioProcessor::AudioProcessor() : synth(audioParameters)
 
 void AudioProcessor::prepare(const xylo::ProcessSpec& spec)
 {
+    DBG("prepare() - sampleRate: " << spec.sampleRate << ", maxBlockSize: " << spec.maxBlockSize << ", numChannels: " << spec.numChannels);
+    
     synth.prepare(spec);
     gain.prepare(spec);
     gain.setDurationInSeconds(0.01);
