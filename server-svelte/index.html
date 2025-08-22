@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Svelte + TS</title>
+    <script src="/wasm/AudioWorklet.js"></script>
+    <script type="module" crossorigin src="/assets/index-Bc8wugQP.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BnKemW0Z.css">
+  </head>
+  <script>
+    /**
+     * @param {AudioWorkletNode} node 
+     */ 
+    function onAudioProcessorInitialized(node)
+    {
+      console.log("Init!");
+      console.log("node", node);
+      console.log("Module", Module);
+    }
+  </script>
+  <body>
+    <div id="app"></div>
+    <div id="header-container"></div>
+    <div id="synth"></div>
+  </body>
+</html>
